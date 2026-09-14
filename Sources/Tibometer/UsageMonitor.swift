@@ -4,6 +4,13 @@ import ServiceManagement
 import TibometerCore
 
 @MainActor
+final class DisplayClock: ObservableObject {
+    @Published private(set) var now = Date()
+
+    func update() { now = Date() }
+}
+
+@MainActor
 final class UsageMonitor: ObservableObject {
     @Published var settings: Settings
     @Published private(set) var menuBarStyle: MenuBarStyle
@@ -15,7 +22,8 @@ final class UsageMonitor: ObservableObject {
     @Published private(set) var sourceConnection = SourceConnectionFeedback()
     @Published private(set) var persistenceWarning: LocalizedMessage?
     @Published private(set) var nextRefreshAt: Date?
-    @Published private(set) var now = Date()
+    let clock = DisplayClock()
+    var now: Date { clock.now }
     @Published private(set) var isTestingWebhook = false
     @Published var webhookFeedback: LocalizedMessage?
     @Published var notificationFeedback: LocalizedMessage?
@@ -106,7 +114,12 @@ final class UsageMonitor: ObservableObject {
         }
         loginItemEnabled = SMAppService.mainApp.status == .enabled
         clockTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.now = Date() }
+            Task { @MainActor in
+                guard let self else { return }
+                let wasStale = self.isStale
+                self.clock.update()
+                if self.isStale != wasStale { self.objectWillChange.send() }
+            }
         }
         Task { await notifier.refreshPermission() }
         guard !demo else { return }
@@ -166,7 +179,7 @@ final class UsageMonitor: ObservableObject {
             }
         }
         isRefreshing = false
-        now = Date()
+        clock.update()
         if revision != settingsRevision {
             Task { await refresh() }
             return

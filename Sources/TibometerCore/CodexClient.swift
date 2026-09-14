@@ -127,7 +127,7 @@ public struct CodexClient: Sendable {
                     let session = try RPCSession(executable: executable, home: home, timeout: configuration.timeout)
                     defer { session.close() }
                     _ = try session.request("initialize", params: [
-                        "clientInfo": ["name": "tibometer", "title": "Tibometer", "version": "1.0.0"]
+                        "clientInfo": ["name": "tibometer", "title": "Tibometer", "version": "1.0.1"]
                     ])
                     try session.send(["method": "initialized"])
                     let accountResult = try session.request("account/read", params: ["refreshToken": false])

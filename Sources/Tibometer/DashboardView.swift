@@ -23,8 +23,17 @@ private enum DashboardTypography {
 struct DashboardView: View {
     @ObservedObject var monitor: UsageMonitor
     @ObservedObject var notifier: LocalNotifier
+    @ObservedObject private var clock: DisplayClock
     var openSettings: () -> Void
     var width: CGFloat = 372
+
+    init(monitor: UsageMonitor, notifier: LocalNotifier, openSettings: @escaping () -> Void, width: CGFloat = 372) {
+        self.monitor = monitor
+        self.notifier = notifier
+        self.clock = monitor.clock
+        self.openSettings = openSettings
+        self.width = width
+    }
 
     private var visibleCredits: CreditsSnapshot? {
         guard let credits = monitor.credits, credits.shouldDisplay else { return nil }
@@ -83,7 +92,7 @@ struct DashboardView: View {
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(monitor.visibleWindows) { kind in
                     if let window = monitor.codexBucket?.window(kind) {
-                        QuotaCard(kind: kind, window: window, now: monitor.now, stale: monitor.isStale)
+                        QuotaCard(kind: kind, window: window, now: clock.now, stale: monitor.isStale)
                     }
                 }
                 if monitor.visibleWindows.isEmpty && visibleCredits == nil {

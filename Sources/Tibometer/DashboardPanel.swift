@@ -45,6 +45,8 @@ final class DashboardPanelController {
     private let panel = QuotaPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
     private let dimensions = PanelDimensions()
     private let statusItem: NSStatusItem
+    private let monitor: UsageMonitor
+    private let openSettings: () -> Void
     private var measuredHeight: CGFloat = 540
     private var globalMouseMonitor: Any?
     private var localEventMonitor: Any?
@@ -55,6 +57,8 @@ final class DashboardPanelController {
 
     init(monitor: UsageMonitor, statusItem: NSStatusItem, openSettings: @escaping () -> Void) {
         self.statusItem = statusItem
+        self.monitor = monitor
+        self.openSettings = openSettings
         panel.title = L10n.text("app.quota_title")
         panel.backgroundColor = .clear
         panel.isOpaque = false
@@ -63,13 +67,6 @@ final class DashboardPanelController {
         panel.hidesOnDeactivate = false
         panel.level = .popUpMenu
         panel.collectionBehavior = [.transient, .moveToActiveSpace, .fullScreenAuxiliary]
-        let host = NSHostingController(rootView: DashboardContainer(dimensions: dimensions, monitor: monitor,
-            openSettings: openSettings, heightChanged: { [weak self] height in
-                DispatchQueue.main.async { self?.contentHeightChanged(height) }
-            }))
-        // PanelPlacement owns sizing and anchoring.
-        host.sizingOptions = []
-        panel.contentViewController = host
         screenObserver = NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification,
             object: nil, queue: .main) { [weak self] _ in
                 Task { @MainActor in if self?.isShown == true { self?.position() } }
@@ -83,6 +80,15 @@ final class DashboardPanelController {
     }
 
     func show() {
+        if panel.contentViewController == nil {
+            let host = NSHostingController(rootView: DashboardContainer(dimensions: dimensions, monitor: monitor,
+                openSettings: openSettings, heightChanged: { [weak self] height in
+                    DispatchQueue.main.async { self?.contentHeightChanged(height) }
+                }))
+            // PanelPlacement owns sizing and anchoring.
+            host.sizingOptions = []
+            panel.contentViewController = host
+        }
         position()
         panel.makeKeyAndOrderFront(nil)
         statusItem.button?.highlight(true)
@@ -91,6 +97,7 @@ final class DashboardPanelController {
 
     func hide() {
         panel.orderOut(nil)
+        panel.contentViewController = nil
         statusItem.button?.highlight(false)
         if let globalMouseMonitor { NSEvent.removeMonitor(globalMouseMonitor) }
         if let localEventMonitor { NSEvent.removeMonitor(localEventMonitor) }

@@ -16,7 +16,7 @@ struct TibometerMain {
 }
 
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var statusItem: NSStatusItem!
     private var dashboard: DashboardPanelController!
     private var settingsWindow: NSWindow?
@@ -95,11 +95,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             window.title = L10n.text("app.settings_title")
             window.contentView = NSHostingView(rootView: SettingsView(monitor: monitor, notifier: monitor.notifier))
             window.isReleasedWhenClosed = false
+            window.delegate = self
             window.center()
             settingsWindow = window
         }
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow, window === settingsWindow else { return }
+        window.contentView = nil
+        settingsWindow = nil
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

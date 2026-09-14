@@ -35,15 +35,8 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Picker(L10n.text("app.settings_title"), selection: $selectedPage) {
-                ForEach(Page.allCases) { page in
-                    Text(page.title).tag(page)
-                }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .controlSize(.regular)
-            .id(L10n.language)
+            PagePicker(selection: $selectedPage, titles: Page.allCases.map(\.title),
+                       accessibilityLabel: L10n.text("app.settings_title"))
 
             pageContent
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -58,6 +51,49 @@ struct SettingsView: View {
             codexPath = monitor.settings.codexPath
             codexHome = monitor.settings.codexHome
             Task { await notifier.refreshPermission() }
+        }
+    }
+
+    private struct PagePicker: NSViewRepresentable {
+        @Binding var selection: Page
+        let titles: [String]
+        let accessibilityLabel: String
+
+        func makeCoordinator() -> Coordinator { Coordinator(selection: $selection) }
+
+        func makeNSView(context: Context) -> NSSegmentedControl {
+            let control = NSSegmentedControl(labels: titles, trackingMode: .selectOne,
+                                             target: context.coordinator, action: #selector(Coordinator.selectPage(_:)))
+            control.segmentDistribution = .fillEqually
+            control.controlSize = .regular
+            control.setContentHuggingPriority(.defaultLow, for: .horizontal)
+            return control
+        }
+
+        func updateNSView(_ control: NSSegmentedControl, context: Context) {
+            context.coordinator.selection = $selection
+            for (index, title) in titles.enumerated() where control.label(forSegment: index) != title {
+                control.setLabel(title, forSegment: index)
+            }
+            let index = Page.allCases.firstIndex(of: selection) ?? 0
+            if control.selectedSegment != index { control.selectedSegment = index }
+            control.setAccessibilityLabel(accessibilityLabel)
+        }
+
+        func sizeThatFits(_ proposal: ProposedViewSize, nsView: NSSegmentedControl, context: Context) -> CGSize? {
+            let size = nsView.intrinsicContentSize
+            return CGSize(width: proposal.width ?? size.width, height: size.height)
+        }
+
+        final class Coordinator: NSObject {
+            var selection: Binding<Page>
+
+            init(selection: Binding<Page>) { self.selection = selection }
+
+            @objc func selectPage(_ control: NSSegmentedControl) {
+                guard Page.allCases.indices.contains(control.selectedSegment) else { return }
+                selection.wrappedValue = Page.allCases[control.selectedSegment]
+            }
         }
     }
 

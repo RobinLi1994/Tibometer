@@ -8,8 +8,8 @@
     <key>CFBundleName</key><string>Tibometer</string>
     <key>CFBundleDisplayName</key><string>Tibometer</string>
     <key>CFBundlePackageType</key><string>APPL</string>
-    <key>CFBundleShortVersionString</key><string>1.0.0</string>
-    <key>CFBundleVersion</key><string>1</string>
+    <key>CFBundleShortVersionString</key><string>1.0.1</string>
+    <key>CFBundleVersion</key><string>2</string>
     <key>NSHumanReadableCopyright</key><string>Copyright © 2026 nangcr. MIT License.</string>
     <key>CFBundleIconFile</key><string>AppIcon</string>
     <key>LSMinimumSystemVersion</key><string>14.0</string>

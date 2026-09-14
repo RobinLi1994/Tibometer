@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+- Reduce idle CPU usage and settings layout work.
+- Release dashboard and settings views when closed.
+- Exclude local build paths from the distributed app.
+
 ## 1.0.0
 
 Initial public release.
