@@ -54,18 +54,21 @@ public enum CodexLocator {
             return path.hasPrefix("/") && FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory)
                 && !isDirectory.boolValue && FileManager.default.isExecutableFile(atPath: path)
         }
+        func bundledExecutables(in application: URL) -> [String] {
+            ["Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+             "Contents/Resources/codex"].map { application.appendingPathComponent($0).path }
+        }
         let custom = custom.trimmingCharacters(in: .whitespacesAndNewlines)
         let paths: [String]
         if !custom.isEmpty {
             let path = (custom as NSString).expandingTildeInPath
             guard path.hasPrefix("/") else { throw TibometerError.executableMissing }
             let url = URL(fileURLWithPath: path)
-            paths = [url.pathExtension.lowercased() == "app"
-                ? url.appendingPathComponent("Contents/Resources/codex").path : path]
+            paths = url.pathExtension.lowercased() == "app" ? bundledExecutables(in: url) : [path]
         } else {
             let registered = applications
                 ?? (LSCopyApplicationURLsForBundleIdentifier("com.openai.codex" as CFString, nil)?.takeRetainedValue() as? [URL] ?? [])
-            paths = registered.map { $0.appendingPathComponent("Contents/Resources/codex").path }
+            paths = registered.flatMap { bundledExecutables(in: $0) }
         }
         guard let path = paths.first(where: isExecutable) else { throw TibometerError.executableMissing }
         return path
@@ -127,7 +130,7 @@ public struct CodexClient: Sendable {
                     let session = try RPCSession(executable: executable, home: home, timeout: configuration.timeout)
                     defer { session.close() }
                     _ = try session.request("initialize", params: [
-                        "clientInfo": ["name": "tibometer", "title": "Tibometer", "version": "1.0.1"]
+                        "clientInfo": ["name": "tibometer", "title": "Tibometer", "version": "1.0.2"]
                     ])
                     try session.send(["method": "initialized"])
                     let accountResult = try session.request("account/read", params: ["refreshToken": false])

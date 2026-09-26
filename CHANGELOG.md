@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.2
+
+- Restore automatic connection after Codex app updates.
+- Support selecting the updated Codex app in data source settings.
+
 ## 1.0.1
 
 - Reduce idle CPU usage and settings layout work.

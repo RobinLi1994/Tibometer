@@ -37,6 +37,16 @@ struct CodexLocatorTests {
         }
     }
 
+    func testNestedCLIBundleSupportsAutomaticAndManualDiscovery() throws {
+        try withDirectory { directory in
+            let app = directory.appendingPathComponent("ChatGPT.app")
+            let binary = app.appendingPathComponent("Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex")
+            try executable(at: binary)
+            expectEqual(try CodexLocator.executable(applications: [app]), binary.path)
+            expectEqual(try CodexLocator.executable(custom: app.path, applications: []), binary.path)
+        }
+    }
+
     func testManuallySelectedApplicationResolvesItsBundledExecutable() throws {
         try withDirectory { directory in
             let app = directory.appendingPathComponent("Other Apps/ChatGPT Preview.app")

@@ -113,6 +113,7 @@ struct TestRunner {
         Checks.run("fixed reset copy, window scope and original quota data", hooks.testResetMessagesUseFullResetCopyAndPreserveQuotaData)
         let locator = CodexLocatorTests()
         Checks.run("renamed and relocated Codex application", locator.testRegisteredApplicationDoesNotDependOnItsNameOrLocation)
+        Checks.run("nested Codex CLI bundle discovery", locator.testNestedCLIBundleSupportsAutomaticAndManualDiscovery)
         Checks.run("missing application requires manual selection", locator.testMissingRegistrationRequiresManualSelection)
         Checks.run("manual application selection resolves bundled executable", locator.testManuallySelectedApplicationResolvesItsBundledExecutable)
         Checks.run("custom executable priority and validation", locator.testCustomPathIsAuthoritativeAndDirectoriesAreRejected)

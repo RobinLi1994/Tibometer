@@ -123,7 +123,7 @@ public enum WebhookRequestBuilder {
         request.httpBody = body
         request.timeoutInterval = 15
         request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        request.setValue("Tibometer/1.0.1", forHTTPHeaderField: "User-Agent")
+        request.setValue("Tibometer/1.0.2", forHTTPHeaderField: "User-Agent")
         request.setValue(event.id, forHTTPHeaderField: "Idempotency-Key")
         request.setValue(event.id, forHTTPHeaderField: "X-Tibometer-Event-ID")
         if !configuration.bearerToken.isEmpty {

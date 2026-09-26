@@ -34,7 +34,7 @@ Every outgoing App Server message passes the allowlist in `CodexReadOnlyPolicy.s
 | `thread/list` | `useStateDbOnly: true` |
 | `account/usage/read` | Usage for an existing task |
 
-Codex discovery uses the application identifier `com.openai.codex` and its bundled `Contents/Resources/codex` executable. Connection results apply only to the source configuration that started the request.
+Codex discovery uses the application identifier `com.openai.codex` and its bundled CLI. Connection results apply only to the source configuration that started the request.
 
 ## Quota and reset rules
 
