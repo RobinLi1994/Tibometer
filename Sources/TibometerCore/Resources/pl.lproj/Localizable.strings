@@ -87,6 +87,8 @@
 "webhook.json" = "Standardowy JSON";
 "webhook.feishu" = "Feishu / Lark";
 "webhook.wecom" = "WeCom";
+"webhook.dingtalk" = "DingTalk";
+"webhook.dingtalk_secret" = "Klucz podpisu DingTalk (wymagany)";
 "webhook.token" = "Token Bearer (opcjonalnie)";
 "webhook.secret" = "Klucz HMAC (opcjonalnie)";
 "webhook.bot_secret" = "Klucz podpisu bota (opcjonalnie)";
@@ -137,6 +139,7 @@
 "error.url" = "Podaj poprawny URL webhooka bez osadzonych danych logowania i fragmentu.";
 "error.https" = "Użyj adresu HTTPS.";
 "error.token" = "Token Bearer nie może zawierać znaków nowego wiersza.";
+"error.dingtalk_secret" = "Wprowadź klucz podpisu DingTalk.";
 "error.config_read" = "Nie udało się wczytać ustawień webhooka. Sprawdź format pliku i uprawnienia.";
 "error.config_write" = "Nie udało się zapisać ustawień webhooka. Sprawdź miejsce na dysku i uprawnienia.";
 "error.webhook_missing" = "Podaj URL webhooka i zapisz.";

@@ -87,6 +87,8 @@
 "webhook.json" = "Обычный JSON";
 "webhook.feishu" = "Feishu / Lark";
 "webhook.wecom" = "WeCom";
+"webhook.dingtalk" = "DingTalk";
+"webhook.dingtalk_secret" = "Ключ подписи DingTalk (обязательно)";
 "webhook.token" = "Токен Bearer (необязательно)";
 "webhook.secret" = "Секрет HMAC (необязательно)";
 "webhook.bot_secret" = "Секрет подписи бота (необязательно)";
@@ -137,6 +139,7 @@
 "error.url" = "Введите корректный URL вебхука без встроенных учётных данных и фрагмента.";
 "error.https" = "Используйте URL с HTTPS.";
 "error.token" = "Токен Bearer не может содержать переносы строк.";
+"error.dingtalk_secret" = "Введите ключ подписи DingTalk.";
 "error.config_read" = "Не удалось загрузить настройки вебхука. Проверьте формат файла и права доступа.";
 "error.config_write" = "Не удалось сохранить настройки вебхука. Проверьте место на диске и права доступа.";
 "error.webhook_missing" = "Введите URL вебхука и сохраните.";

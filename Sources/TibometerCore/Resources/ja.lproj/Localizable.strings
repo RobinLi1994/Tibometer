@@ -87,6 +87,8 @@
 "webhook.json" = "汎用 JSON";
 "webhook.feishu" = "Feishu / Lark";
 "webhook.wecom" = "WeCom";
+"webhook.dingtalk" = "DingTalk";
+"webhook.dingtalk_secret" = "DingTalk 署名シークレット（必須）";
 "webhook.token" = "Bearer トークン（任意）";
 "webhook.secret" = "HMAC シークレット（任意）";
 "webhook.bot_secret" = "ボット署名シークレット（任意）";
@@ -137,6 +139,7 @@
 "error.url" = "認証情報やフラグメントを含まない有効な Webhook URL を入力してください。";
 "error.https" = "HTTPS URL を使用してください。";
 "error.token" = "Bearer トークンに改行は使用できません。";
+"error.dingtalk_secret" = "DingTalk の署名シークレットを入力してください。";
 "error.config_read" = "Webhook 設定を読み込めません。ファイル形式とアクセス権を確認してください。";
 "error.config_write" = "Webhook 設定を保存できません。ディスク容量とアクセス権を確認してください。";
 "error.webhook_missing" = "Webhook URL を入力して保存してください。";

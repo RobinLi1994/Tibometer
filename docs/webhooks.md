@@ -2,7 +2,9 @@
 
 In Settings → Webhook, choose a format, enter a URL, enable delivery, and save. Use Send Test to check the destination.
 
-Supported formats are generic JSON, Slack, Discord, Feishu / Lark, and WeCom. Feishu supports bot signing secrets. If a receiver requires keywords, allow `Codex` and `Tibometer` so both reset and test messages are accepted.
+Supported formats are generic JSON, Slack, Discord, Feishu / Lark, WeCom, and DingTalk. Feishu supports optional bot signing secrets; DingTalk requires a signing secret. If a receiver requires keywords, allow `Codex` and `Tibometer` so both reset and test messages are accepted.
+
+For a [DingTalk custom group robot](https://open.dingtalk.com/document/orgapp/custom-robot-access), choose the signing security mode, paste its Webhook URL (including `access_token`), and enter the `SEC` signing secret in Settings. Tibometer signs each delivery with the current Unix millisecond timestamp and adds `timestamp` and URL-encoded `sign` query parameters. DingTalk receives a text message; a nonzero `errcode` is reported as a rejected delivery.
 
 ## Reset messages
 
@@ -50,7 +52,7 @@ X-Tibometer-Event-ID: <event ID>
 Idempotency-Key: <event ID>
 ```
 
-Verify the exact request bytes, timestamp, and event ID at the receiver. Feishu uses its own bot signature format.
+Verify the exact request bytes, timestamp, and event ID at the receiver. Feishu and DingTalk use their own bot signature formats.
 
 ## Delivery
 

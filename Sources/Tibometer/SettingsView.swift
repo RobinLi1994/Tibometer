@@ -202,6 +202,8 @@ struct SettingsView: View {
                     SecureField(L10n.text("webhook.secret"), text: $webhook.signingSecret)
                 } else if webhook.format == .feishu {
                     SecureField(L10n.text("webhook.bot_secret"), text: $webhook.signingSecret)
+                } else if webhook.format == .dingtalk {
+                    SecureField(L10n.text("webhook.dingtalk_secret"), text: $webhook.signingSecret)
                 }
             } header: { Text(L10n.text("webhook.receiver")) }
             Section {
@@ -225,7 +227,7 @@ struct SettingsView: View {
         var value = webhook
         value.url = value.url.trimmingCharacters(in: .whitespacesAndNewlines)
         if value.format != .json { value.bearerToken = "" }
-        if value.format != .json && value.format != .feishu { value.signingSecret = "" }
+        if value.format != .json && value.format != .feishu && value.format != .dingtalk { value.signingSecret = "" }
         return value
     }
 

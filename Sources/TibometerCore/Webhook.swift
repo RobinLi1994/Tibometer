@@ -7,6 +7,7 @@ public enum WebhookFormat: String, Codable, CaseIterable, Identifiable, Sendable
     case discord
     case feishu
     case wecom
+    case dingtalk
 
     public var id: String { rawValue }
     public var title: String {
@@ -16,6 +17,7 @@ public enum WebhookFormat: String, Codable, CaseIterable, Identifiable, Sendable
         case .discord: return "Discord"
         case .feishu: return L10n.text("webhook.feishu")
         case .wecom: return L10n.text("webhook.wecom")
+        case .dingtalk: return L10n.text("webhook.dingtalk")
         }
     }
 }
@@ -47,6 +49,9 @@ public struct WebhookConfiguration: Codable, Equatable, Sendable {
         }
         guard bearerToken.rangeOfCharacter(from: .newlines) == nil else {
             throw TibometerError.webhook("error.token")
+        }
+        if format == .dingtalk && signingSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            throw TibometerError.webhook("error.dingtalk_secret")
         }
         return target
     }
@@ -115,10 +120,27 @@ public enum WebhookRequestBuilder {
                 object["sign"] = Data(HMAC<SHA256>.authenticationCode(for: Data(), using: key)).base64EncodedString()
             }
             body = try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
-        case .wecom:
+        case .wecom, .dingtalk:
             body = try JSONSerialization.data(withJSONObject: ["msgtype": "text", "text": ["content": payload.message]], options: [.sortedKeys])
         }
-        var request = URLRequest(url: try configuration.validatedURL())
+        var target = try configuration.validatedURL()
+        if configuration.format == .dingtalk {
+            guard var components = URLComponents(url: target, resolvingAgainstBaseURL: false) else {
+                throw TibometerError.webhook("error.url")
+            }
+            let timestamp = String(Int((now.timeIntervalSince1970 * 1000).rounded()))
+            let secret = configuration.signingSecret
+            let key = SymmetricKey(data: Data(secret.utf8))
+            let signature = Data(HMAC<SHA256>.authenticationCode(for: Data("\(timestamp)\n\(secret)".utf8), using: key)).base64EncodedString()
+            guard let encoded = signature.addingPercentEncoding(withAllowedCharacters: .alphanumerics) else {
+                throw TibometerError.webhook("error.url")
+            }
+            let existing = components.percentEncodedQuery.flatMap { $0.isEmpty ? nil : $0 }
+            components.percentEncodedQuery = [existing, "timestamp=\(timestamp)", "sign=\(encoded)"].compactMap { $0 }.joined(separator: "&")
+            guard let signedURL = components.url else { throw TibometerError.webhook("error.url") }
+            target = signedURL
+        }
+        var request = URLRequest(url: target)
         request.httpMethod = "POST"
         request.httpBody = body
         request.timeoutInterval = 15
@@ -172,9 +194,14 @@ public struct WebhookSender: Sendable {
         guard (200..<300).contains(http.statusCode) else {
             throw WebhookDeliveryError(message: .init("error.webhook_http", String(http.statusCode)), retryable: http.statusCode == 429 || http.statusCode >= 500)
         }
-        if configuration.format == .feishu || configuration.format == .wecom {
-            guard let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-                  let code = (object["code"] as? Int) ?? (object["errcode"] as? Int) ?? (object["StatusCode"] as? Int) else {
+        if configuration.format == .feishu || configuration.format == .wecom || configuration.format == .dingtalk {
+            guard let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+                throw WebhookDeliveryError(message: "error.bot_response", retryable: false)
+            }
+            let code = configuration.format == .dingtalk
+                ? object["errcode"] as? Int
+                : (object["code"] as? Int) ?? (object["errcode"] as? Int) ?? (object["StatusCode"] as? Int)
+            guard let code else {
                 throw WebhookDeliveryError(message: "error.bot_response", retryable: false)
             }
             guard code == 0 else {

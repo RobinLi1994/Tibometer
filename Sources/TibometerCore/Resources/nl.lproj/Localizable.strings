@@ -87,6 +87,8 @@
 "webhook.json" = "Algemene JSON";
 "webhook.feishu" = "Feishu / Lark";
 "webhook.wecom" = "WeCom";
+"webhook.dingtalk" = "DingTalk";
+"webhook.dingtalk_secret" = "DingTalk-ondertekeningssleutel (verplicht)";
 "webhook.token" = "Bearer-token (optioneel)";
 "webhook.secret" = "HMAC-sleutel (optioneel)";
 "webhook.bot_secret" = "Bot-ondertekeningssleutel (optioneel)";
@@ -137,6 +139,7 @@
 "error.url" = "Voer een geldige webhook-URL in zonder ingesloten inloggegevens of fragment.";
 "error.https" = "Gebruik een HTTPS-URL.";
 "error.token" = "Het Bearer-token mag geen regeleinden bevatten.";
+"error.dingtalk_secret" = "Voer de DingTalk-ondertekeningssleutel in.";
 "error.config_read" = "Webhook-instellingen konden niet worden geladen. Controleer de bestandsindeling en toegangsrechten.";
 "error.config_write" = "Webhook-instellingen konden niet worden bewaard. Controleer schijfruimte en toegangsrechten.";
 "error.webhook_missing" = "Voer een webhook-URL in en bewaar deze.";

@@ -87,6 +87,8 @@
 "webhook.json" = "일반 JSON";
 "webhook.feishu" = "Feishu / Lark";
 "webhook.wecom" = "WeCom";
+"webhook.dingtalk" = "DingTalk";
+"webhook.dingtalk_secret" = "DingTalk 서명 비밀 키(필수)";
 "webhook.token" = "Bearer 토큰(선택 사항)";
 "webhook.secret" = "HMAC 비밀 키(선택 사항)";
 "webhook.bot_secret" = "봇 서명 비밀 키(선택 사항)";
@@ -137,6 +139,7 @@
 "error.url" = "인증 정보나 프래그먼트가 없는 유효한 Webhook URL을 입력하세요.";
 "error.https" = "HTTPS URL을 사용하세요.";
 "error.token" = "Bearer 토큰에 줄바꿈을 포함할 수 없습니다.";
+"error.dingtalk_secret" = "DingTalk 서명 비밀 키를 입력하세요.";
 "error.config_read" = "Webhook 설정을 불러올 수 없습니다. 파일 형식과 권한을 확인하세요.";
 "error.config_write" = "Webhook 설정을 저장할 수 없습니다. 디스크 공간과 권한을 확인하세요.";
 "error.webhook_missing" = "Webhook URL을 입력하고 저장하세요.";

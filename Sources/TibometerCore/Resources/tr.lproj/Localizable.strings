@@ -87,6 +87,8 @@
 "webhook.json" = "Genel JSON";
 "webhook.feishu" = "Feishu / Lark";
 "webhook.wecom" = "WeCom";
+"webhook.dingtalk" = "DingTalk";
+"webhook.dingtalk_secret" = "DingTalk imzalama anahtarı (gerekli)";
 "webhook.token" = "Bearer belirteci (isteğe bağlı)";
 "webhook.secret" = "HMAC anahtarı (isteğe bağlı)";
 "webhook.bot_secret" = "Bot imza anahtarı (isteğe bağlı)";
@@ -137,6 +139,7 @@
 "error.url" = "Gömülü kimlik bilgileri veya parça tanımlayıcısı içermeyen geçerli bir webhook URL’si girin.";
 "error.https" = "HTTPS URL’si kullanın.";
 "error.token" = "Bearer belirteci satır sonu içeremez.";
+"error.dingtalk_secret" = "DingTalk imzalama anahtarını girin.";
 "error.config_read" = "Webhook ayarları yüklenemedi. Dosya biçimini ve izinleri kontrol edin.";
 "error.config_write" = "Webhook ayarları kaydedilemedi. Disk alanını ve izinleri kontrol edin.";
 "error.webhook_missing" = "Bir webhook URL’si girip kaydedin.";

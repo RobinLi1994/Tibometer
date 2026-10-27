@@ -87,6 +87,8 @@
 "webhook.json" = "JSON genérico";
 "webhook.feishu" = "Feishu / Lark";
 "webhook.wecom" = "WeCom";
+"webhook.dingtalk" = "DingTalk";
+"webhook.dingtalk_secret" = "Clave de firma de DingTalk (obligatoria)";
 "webhook.token" = "Token Bearer (opcional)";
 "webhook.secret" = "Clave HMAC (opcional)";
 "webhook.bot_secret" = "Clave de firma del bot (opcional)";
@@ -137,6 +139,7 @@
 "error.url" = "Introduce una URL de webhook válida, sin credenciales integradas ni fragmentos.";
 "error.https" = "Usa una URL HTTPS.";
 "error.token" = "El token Bearer no puede contener saltos de línea.";
+"error.dingtalk_secret" = "Introduce la clave de firma de DingTalk.";
 "error.config_read" = "No se pudieron cargar los ajustes del webhook. Comprueba el formato del archivo y los permisos.";
 "error.config_write" = "No se pudieron guardar los ajustes del webhook. Comprueba el espacio en disco y los permisos.";
 "error.webhook_missing" = "Introduce una URL de webhook y guárdala.";

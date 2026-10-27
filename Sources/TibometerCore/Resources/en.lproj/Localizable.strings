@@ -87,6 +87,8 @@
 "webhook.json" = "Generic JSON";
 "webhook.feishu" = "Feishu / Lark";
 "webhook.wecom" = "WeCom";
+"webhook.dingtalk" = "DingTalk";
+"webhook.dingtalk_secret" = "DingTalk signing secret (required)";
 "webhook.token" = "Bearer token (optional)";
 "webhook.secret" = "HMAC secret (optional)";
 "webhook.bot_secret" = "Bot signing secret (optional)";
@@ -149,6 +151,7 @@
 "error.url" = "Enter a valid webhook URL without embedded credentials or a fragment.";
 "error.https" = "Use an HTTPS URL.";
 "error.token" = "The bearer token cannot contain newlines.";
+"error.dingtalk_secret" = "Enter the DingTalk signing secret.";
 "error.config_read" = "Could not load Webhook settings. Check the file format and permissions.";
 "error.config_write" = "Could not save Webhook settings. Check disk space and permissions.";
 "error.webhook_missing" = "Enter a Webhook URL and save.";

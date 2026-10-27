@@ -87,6 +87,8 @@
 "webhook.json" = "JSON générique";
 "webhook.feishu" = "Feishu / Lark";
 "webhook.wecom" = "WeCom";
+"webhook.dingtalk" = "DingTalk";
+"webhook.dingtalk_secret" = "Clé de signature DingTalk (obligatoire)";
 "webhook.token" = "Jeton Bearer (facultatif)";
 "webhook.secret" = "Secret HMAC (facultatif)";
 "webhook.bot_secret" = "Secret de signature du bot (facultatif)";
@@ -137,6 +139,7 @@
 "error.url" = "Saisissez une URL de webhook valide, sans identifiants intégrés ni fragment.";
 "error.https" = "Utilisez une URL HTTPS.";
 "error.token" = "Le jeton Bearer ne peut pas contenir de saut de ligne.";
+"error.dingtalk_secret" = "Saisissez la clé de signature DingTalk.";
 "error.config_read" = "Impossible de charger les réglages du webhook. Vérifiez le format du fichier et les autorisations.";
 "error.config_write" = "Impossible d’enregistrer les réglages du webhook. Vérifiez l’espace disque et les autorisations.";
 "error.webhook_missing" = "Saisissez une URL de webhook et enregistrez.";

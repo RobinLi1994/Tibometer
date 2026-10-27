@@ -87,6 +87,8 @@
 "webhook.json" = "通用 JSON";
 "webhook.feishu" = "飞书 / Lark";
 "webhook.wecom" = "企业微信";
+"webhook.dingtalk" = "钉钉";
+"webhook.dingtalk_secret" = "钉钉加签密钥（必填）";
 "webhook.token" = "Bearer Token（选填）";
 "webhook.secret" = "HMAC 签名密钥（选填）";
 "webhook.bot_secret" = "机器人签名密钥（选填）";
@@ -149,6 +151,7 @@
 "error.url" = "请输入有效的 Webhook URL，不支持 URL 内嵌账号密码或片段。";
 "error.https" = "请使用 HTTPS 地址。";
 "error.token" = "Bearer Token 不能包含换行。";
+"error.dingtalk_secret" = "请填写钉钉加签密钥。";
 "error.config_read" = "无法读取 Webhook 设置，请检查文件格式和权限。";
 "error.config_write" = "无法保存 Webhook 设置，请检查磁盘空间和权限。";
 "error.webhook_missing" = "请填写 Webhook 地址并保存。";

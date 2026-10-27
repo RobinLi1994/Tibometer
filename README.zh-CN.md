@@ -11,7 +11,7 @@ A tiny Codex usage monitor
 - 菜单栏显示 **5H**、**7D** 剩余额度，可单独或同时显示。
 - 百分比、进度条、进度条加百分比、进度环、进度环加百分比五种样式。
 - 查看重置时间和额外点数，额度重置时发送通知。
-- 支持通用 JSON、Slack、Discord、飞书 / Lark 和企业微信 Webhook。
+- 支持通用 JSON、Slack、Discord、飞书 / Lark、企业微信和加签钉钉 Webhook。
 - 支持 16 种语言，可跟随系统或手动切换。
 
 > Tibo 又出手了。

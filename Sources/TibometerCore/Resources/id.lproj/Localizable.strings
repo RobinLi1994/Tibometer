@@ -87,6 +87,8 @@
 "webhook.json" = "JSON umum";
 "webhook.feishu" = "Feishu / Lark";
 "webhook.wecom" = "WeCom";
+"webhook.dingtalk" = "DingTalk";
+"webhook.dingtalk_secret" = "Kunci tanda tangan DingTalk (wajib)";
 "webhook.token" = "Token Bearer (opsional)";
 "webhook.secret" = "Kunci HMAC (opsional)";
 "webhook.bot_secret" = "Kunci tanda tangan bot (opsional)";
@@ -137,6 +139,7 @@
 "error.url" = "Masukkan URL webhook yang valid tanpa kredensial tertanam atau fragmen.";
 "error.https" = "Gunakan URL HTTPS.";
 "error.token" = "Token Bearer tidak boleh mengandung baris baru.";
+"error.dingtalk_secret" = "Masukkan kunci tanda tangan DingTalk.";
 "error.config_read" = "Tidak dapat memuat pengaturan webhook. Periksa format berkas dan izin.";
 "error.config_write" = "Tidak dapat menyimpan pengaturan webhook. Periksa ruang disk dan izin.";
 "error.webhook_missing" = "Masukkan URL webhook lalu simpan.";

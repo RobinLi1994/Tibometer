@@ -42,9 +42,33 @@ final class WebhookTests {
         expectEqual(signature, "sha256=" + expected.map { String(format: "%02x", $0) }.joined())
     }
 
+    func testDingTalkSignedURLPreservesTokenAndEncodesSignature() throws {
+        let now = Date(timeIntervalSince1970: 1700000000.123)
+        let configuration = WebhookConfiguration(url: "https://oapi.dingtalk.com/robot/send?access_token=abc%2B123",
+                                                 format: .dingtalk, signingSecret: "SECtest-secret0")
+        let request = try WebhookRequestBuilder.build(event: .testEvent(now: now), configuration: configuration, isTest: true, now: now)
+        let url = try require(request.url)
+        let components = try require(URLComponents(url: url, resolvingAgainstBaseURL: false))
+        expectEqual(components.queryItems?.first(where: { $0.name == "access_token" })?.value, "abc+123")
+        expectEqual(components.queryItems?.first(where: { $0.name == "timestamp" })?.value, "1700000000123")
+        expectEqual(components.queryItems?.first(where: { $0.name == "sign" })?.value, "uV95GnVejFsy9+utjtLP+E1tAzu/UDhZ2r+hGc7YFFc=")
+        expect(components.percentEncodedQuery?.contains("sign=uV95GnVejFsy9%2ButjtLP%2BE1tAzu%2FUDhZ2r%2BhGc7YFFc%3D") == true)
+        expectFalse(url.absoluteString.contains("SECtest-secret0"))
+        let body = try require(JSONSerialization.jsonObject(with: require(request.httpBody)) as? [String: Any])
+        expectEqual(body["msgtype"] as? String, "text")
+        expectEqual((body["text"] as? [String: String])?["content"], L10n.text("webhook.test_message"))
+        expectNil(body["sign"])
+    }
+
+    func testDingTalkRequiresSigningSecret() {
+        let configuration = WebhookConfiguration(url: "https://oapi.dingtalk.com/robot/send?access_token=abc", format: .dingtalk)
+        expectThrows(try configuration.validatedURL())
+    }
+
     func testTestEventAndChatFormats() throws {
         for format in WebhookFormat.allCases {
-            let request = try WebhookRequestBuilder.build(event: .testEvent(), configuration: .init(url: "https://example.com", format: format), isTest: true)
+            let request = try WebhookRequestBuilder.build(event: .testEvent(), configuration: .init(url: "https://example.com", format: format,
+                                                                                                  signingSecret: format == .dingtalk ? "SECtest-secret" : ""), isTest: true)
             let body = try require(JSONSerialization.jsonObject(with: require(request.httpBody)) as? [String: Any])
             switch format {
             case .json: expectEqual(body["event"] as? String, "codex.webhook.test")
@@ -54,6 +78,7 @@ final class WebhookTests {
                 expectNotNil(body["allowed_mentions"])
             case .feishu: expectEqual(body["msg_type"] as? String, "text")
             case .wecom: expectEqual(body["msgtype"] as? String, "text")
+            case .dingtalk: expectEqual(body["msgtype"] as? String, "text")
             }
         }
     }
@@ -77,7 +102,8 @@ final class WebhookTests {
 
                     let expected = "\(event.notificationTitle)\n\(event.message)\n\(window.title)"
                     for format in WebhookFormat.allCases {
-                        let request = try WebhookRequestBuilder.build(event: event, configuration: .init(url: "https://example.com", format: format))
+                        let request = try WebhookRequestBuilder.build(event: event, configuration: .init(url: "https://example.com", format: format,
+                                                                                                         signingSecret: format == .dingtalk ? "SECtest-secret" : ""))
                         let body = try require(JSONSerialization.jsonObject(with: require(request.httpBody)) as? [String: Any])
                         let text: String?
                         switch format {
@@ -89,6 +115,7 @@ final class WebhookTests {
                         case .discord: text = body["content"] as? String
                         case .feishu: text = (body["content"] as? [String: String])?["text"]
                         case .wecom: text = (body["text"] as? [String: String])?["content"]
+                        case .dingtalk: text = (body["text"] as? [String: String])?["content"]
                         }
                         expectEqual(text, expected)
                     }

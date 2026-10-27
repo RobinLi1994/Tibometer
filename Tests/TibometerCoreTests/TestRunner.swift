@@ -115,6 +115,8 @@ struct TestRunner {
         Checks.run("webhook URL validation", hooks.testOnlyHTTPSOrLoopbackHTTPIsAccepted)
         Checks.run("payload privacy and event ID", hooks.testGenericPayloadHasNoAccountCredentialsAndStableEventID)
         Checks.run("HMAC signature", hooks.testGenericSignatureValidatesExactBodyAndTimestamp)
+        Checks.run("DingTalk signed URL and payload", hooks.testDingTalkSignedURLPreservesTokenAndEncodesSignature)
+        Checks.run("DingTalk requires signing secret", hooks.testDingTalkRequiresSigningSecret)
         Checks.run("webhook message formats", hooks.testTestEventAndChatFormats)
         Checks.run("fixed reset copy, window scope and original quota data", hooks.testResetMessagesUseFullResetCopyAndPreserveQuotaData)
         let locator = CodexLocatorTests()

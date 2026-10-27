@@ -87,6 +87,8 @@
 "webhook.json" = "通用 JSON";
 "webhook.feishu" = "飛書 / Lark";
 "webhook.wecom" = "企業微信";
+"webhook.dingtalk" = "釘釘";
+"webhook.dingtalk_secret" = "釘釘加簽密鑰（必填）";
 "webhook.token" = "Bearer 權杖（選填）";
 "webhook.secret" = "HMAC 密鑰（選填）";
 "webhook.bot_secret" = "機器人簽章密鑰（選填）";
@@ -137,6 +139,7 @@
 "error.url" = "請輸入有效的 Webhook URL，不含內嵌帳密或片段識別碼。";
 "error.https" = "請使用 HTTPS URL。";
 "error.token" = "Bearer 權杖不可包含換行。";
+"error.dingtalk_secret" = "請填寫釘釘加簽密鑰。";
 "error.config_read" = "無法載入 Webhook 設定。請檢查檔案格式與權限。";
 "error.config_write" = "無法儲存 Webhook 設定。請檢查磁碟空間與權限。";
 "error.webhook_missing" = "請輸入 Webhook URL 並儲存。";

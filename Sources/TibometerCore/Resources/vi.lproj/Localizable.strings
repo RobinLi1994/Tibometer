@@ -87,6 +87,8 @@
 "webhook.json" = "JSON thông thường";
 "webhook.feishu" = "Feishu / Lark";
 "webhook.wecom" = "WeCom";
+"webhook.dingtalk" = "DingTalk";
+"webhook.dingtalk_secret" = "Khóa ký DingTalk (bắt buộc)";
 "webhook.token" = "Token Bearer (tùy chọn)";
 "webhook.secret" = "Khóa HMAC (tùy chọn)";
 "webhook.bot_secret" = "Khóa ký của bot (tùy chọn)";
@@ -137,6 +139,7 @@
 "error.url" = "Nhập URL webhook hợp lệ, không chứa thông tin xác thực hoặc mã định danh phân đoạn.";
 "error.https" = "Sử dụng URL HTTPS.";
 "error.token" = "Token Bearer không được chứa ký tự xuống dòng.";
+"error.dingtalk_secret" = "Nhập khóa ký DingTalk.";
 "error.config_read" = "Không thể tải cài đặt webhook. Kiểm tra định dạng tệp và quyền truy cập.";
 "error.config_write" = "Không thể lưu cài đặt webhook. Kiểm tra dung lượng ổ đĩa và quyền truy cập.";
 "error.webhook_missing" = "Nhập URL webhook rồi lưu.";

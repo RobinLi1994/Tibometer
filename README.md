@@ -11,7 +11,7 @@ A tiny Codex usage monitor
 - See either or both **5H** and **7D** limits in the macOS menu bar.
 - Choose percentages, bars, bars with percentages, rings, or rings with percentages.
 - View reset times and extra credits, and get notified when limits reset.
-- Send reset alerts through JSON, Slack, Discord, Feishu / Lark, or WeCom webhooks.
+- Send reset alerts through JSON, Slack, Discord, Feishu / Lark, WeCom, or signed DingTalk webhooks.
 - 16 languages, with system detection and manual selection.
 
 > Tibo did it again.

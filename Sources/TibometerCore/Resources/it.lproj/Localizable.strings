@@ -87,6 +87,8 @@
 "webhook.json" = "JSON generico";
 "webhook.feishu" = "Feishu / Lark";
 "webhook.wecom" = "WeCom";
+"webhook.dingtalk" = "DingTalk";
+"webhook.dingtalk_secret" = "Chiave di firma DingTalk (obbligatoria)";
 "webhook.token" = "Token Bearer (facoltativo)";
 "webhook.secret" = "Chiave HMAC (facoltativa)";
 "webhook.bot_secret" = "Chiave di firma del bot (facoltativa)";
@@ -137,6 +139,7 @@
 "error.url" = "Inserisci un URL webhook valido, senza credenziali incorporate né frammenti.";
 "error.https" = "Usa un URL HTTPS.";
 "error.token" = "Il token Bearer non può contenere interruzioni di riga.";
+"error.dingtalk_secret" = "Inserisci la chiave di firma DingTalk.";
 "error.config_read" = "Impossibile caricare le impostazioni webhook. Controlla il formato del file e le autorizzazioni.";
 "error.config_write" = "Impossibile salvare le impostazioni webhook. Controlla lo spazio su disco e le autorizzazioni.";
 "error.webhook_missing" = "Inserisci un URL webhook e salva.";

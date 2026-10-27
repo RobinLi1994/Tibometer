@@ -9,6 +9,8 @@ import os
 from pathlib import Path
 import subprocess
 import threading
+import time
+from urllib.parse import parse_qs, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 subprocess.run(["swift", "build", "--product", "tibometer-probe"], cwd=ROOT, check=True)
@@ -20,16 +22,20 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
         raw = self.rfile.read(int(self.headers.get("Content-Length", "0")))
         requests.append((self.path, dict(self.headers), raw))
-        if self.path == "/redirect":
+        path = urlsplit(self.path).path
+        if path == "/redirect":
             self.send_response(307)
             self.send_header("Location", "/must-not-receive")
             self.end_headers()
             return
-        status = {"/unauthorized": 401, "/unavailable": 503}.get(self.path, 200)
+        status = {"/unauthorized": 401, "/unavailable": 503}.get(path, 200)
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(json.dumps({"code": 999 if self.path == "/bot-rejected" else 0, "errcode": 0}).encode())
+        response = {"code": 999 if path == "/bot-rejected" else 0, "errcode": 310000 if path == "/dingtalk-rejected" else 0}
+        if path == "/dingtalk-malformed":
+            del response["errcode"]
+        self.wfile.write(json.dumps(response).encode())
 
     def log_message(self, *_):
         pass
@@ -55,8 +61,9 @@ def send(path, fmt="json", success=True):
 
 
 try:
-    for fmt in ["json", "slack", "discord", "feishu", "wecom"]:
-        path, headers, raw = send("/" + fmt, fmt)
+    for fmt in ["json", "slack", "discord", "feishu", "wecom", "dingtalk"]:
+        target = "/dingtalk?access_token=fixture%2Btoken" if fmt == "dingtalk" else "/" + fmt
+        path, headers, raw = send(target, fmt)
         body = json.loads(raw)
         lower_headers = {k.lower(): v for k, v in headers.items()}
         assert lower_headers["authorization"] == "Bearer fixture-token"
@@ -70,16 +77,26 @@ try:
         if fmt == "feishu":
             expected = base64.b64encode(hmac.new((body["timestamp"] + "\nfixture-secret").encode(), b"", hashlib.sha256).digest()).decode()
             assert body["sign"] == expected
+        if fmt == "dingtalk":
+            query = parse_qs(urlsplit(path).query)
+            assert query["access_token"] == ["fixture+token"]
+            timestamp = query["timestamp"][0]
+            assert abs(int(timestamp) - round(time.time() * 1000)) < 60000
+            expected = base64.b64encode(hmac.new(b"fixture-secret", (timestamp + "\nfixture-secret").encode(), hashlib.sha256).digest()).decode()
+            assert query["sign"] == [expected]
+            assert body["msgtype"] == "text" and "Tibometer" in body["text"]["content"]
         print("PASS loopback delivery:", fmt)
     send("/unauthorized", success=False)
     send("/unavailable", success=False)
     send("/bot-rejected", fmt="feishu", success=False)
+    send("/dingtalk-rejected?access_token=fixture", fmt="dingtalk", success=False)
+    send("/dingtalk-malformed?access_token=fixture", fmt="dingtalk", success=False)
     before = len(requests)
     send("/redirect", success=False)
     assert len(requests) == before + 1
     assert not any(path == "/must-not-receive" for path, _, _ in requests)
     print("PASS HTTP errors, bot rejection, and redirect refusal")
-    print("9 loopback HTTP scenarios passed")
+    print("12 loopback HTTP scenarios passed")
 finally:
     server.shutdown()
     server.server_close()

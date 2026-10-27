@@ -87,6 +87,8 @@
 "webhook.json" = "Allgemeines JSON";
 "webhook.feishu" = "Feishu / Lark";
 "webhook.wecom" = "WeCom";
+"webhook.dingtalk" = "DingTalk";
+"webhook.dingtalk_secret" = "DingTalk-Signaturschlüssel (erforderlich)";
 "webhook.token" = "Bearer-Token (optional)";
 "webhook.secret" = "HMAC-Schlüssel (optional)";
 "webhook.bot_secret" = "Bot-Signaturschlüssel (optional)";
@@ -137,6 +139,7 @@
 "error.url" = "Gib eine gültige Webhook-URL ohne eingebettete Zugangsdaten oder Fragment ein.";
 "error.https" = "Verwende eine HTTPS-URL.";
 "error.token" = "Das Bearer-Token darf keine Zeilenumbrüche enthalten.";
+"error.dingtalk_secret" = "Geben Sie den DingTalk-Signaturschlüssel ein.";
 "error.config_read" = "Webhook-Einstellungen konnten nicht geladen werden. Prüfe Dateiformat und Berechtigungen.";
 "error.config_write" = "Webhook-Einstellungen konnten nicht gespeichert werden. Prüfe Speicherplatz und Berechtigungen.";
 "error.webhook_missing" = "Gib eine Webhook-URL ein und speichere sie.";
