@@ -151,7 +151,15 @@ final class UsageMonitor: ObservableObject {
         isRefreshing = true
         let revision = settingsRevision
         do {
-            let fresh = try await CodexClient().fetch(configuration: .init(executablePath: settings.codexPath, homePath: settings.codexHome))
+            let selectedProviderID = settings.ccSwitchProviderID
+            let home = selectedProviderID == nil ? settings.codexHome : OfficialCodexHome.defaultURL.path
+            if let selectedProviderID {
+                try CCSwitchOfficialSource().validate(providerID: selectedProviderID, codexHome: OfficialCodexHome.defaultURL)
+            }
+            let fresh = try await CodexClient().fetch(configuration: .init(executablePath: settings.codexPath, homePath: home))
+            if let selectedProviderID {
+                try CCSwitchOfficialSource().validate(providerID: selectedProviderID, codexHome: OfficialCodexHome.defaultURL)
+            }
             if revision == settingsRevision {
                 let switchedAccount = state.snapshot.map { $0.accountFingerprint != fresh.accountFingerprint } ?? false
                 if switchedAccount { state.records = [] }
@@ -190,7 +198,8 @@ final class UsageMonitor: ObservableObject {
 
     private func scheduleNextRefresh() {
         refreshTimer?.invalidate()
-        let delay = RefreshSchedule.delay(snapshot: snapshot, now: Date(), interval: settings.refreshInterval, failures: failures)
+        let interval = settings.ccSwitchProviderID == nil ? settings.refreshInterval : max(120, settings.refreshInterval)
+        let delay = RefreshSchedule.delay(snapshot: snapshot, now: Date(), interval: interval, failures: failures)
         nextRefreshAt = Date().addingTimeInterval(delay)
         refreshTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
             Task { @MainActor in await self?.refresh() }
@@ -199,6 +208,7 @@ final class UsageMonitor: ObservableObject {
 
     func updateSettings(_ updated: Settings) {
         let changedSource = updated.codexPath != settings.codexPath || updated.codexHome != settings.codexHome
+            || updated.ccSwitchProviderID != settings.ccSwitchProviderID
         settings = updated
         guard !demo else { return }
         settings.save()
@@ -216,14 +226,22 @@ final class UsageMonitor: ObservableObject {
         Task { await deliverPending() }
     }
 
-    func saveAndConnect(executablePath: String, homePath: String) {
+    func saveAndConnect(executablePath: String, homePath: String, ccSwitchProviderID: String? = nil) {
         guard !demo else { sourceConnection.reject("status.demo"); return }
         do {
             _ = try CodexLocator.executable(custom: executablePath)
-            _ = try CodexLocator.home(custom: homePath)
+            if let ccSwitchProviderID {
+                guard try CCSwitchOfficialSource().providers().contains(where: { $0.id == ccSwitchProviderID }) else {
+                    throw TibometerError.officialProviderMissing
+                }
+                try OfficialCodexHome.prepare()
+            } else {
+                _ = try CodexLocator.home(custom: homePath)
+            }
             var updated = settings
             updated.codexPath = executablePath.trimmingCharacters(in: .whitespacesAndNewlines)
             updated.codexHome = homePath.trimmingCharacters(in: .whitespacesAndNewlines)
+            updated.ccSwitchProviderID = ccSwitchProviderID
             updateSettings(updated)
             sourceConnection.begin(revision: settingsRevision)
             Task { await refresh() }

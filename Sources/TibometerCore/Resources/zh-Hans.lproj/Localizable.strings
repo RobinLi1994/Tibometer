@@ -115,6 +115,14 @@
 "source.saved" = "已保存，正在连接。";
 "source.save" = "保存并连接";
 "source.custom_section" = "连接";
+"source.mode" = "额度来源";
+"source.local_codex" = "本机 Codex";
+"source.ccswitch" = "CC Switch 官方账号";
+"source.official_account" = "官方账号";
+"source.copy_login" = "复制登录命令";
+"source.ccswitch_help" = "在独立数据目录中登录一次所选账号，再保存并连接；当前 Codex 供应商不会改变。";
+"source.login_copied" = "登录命令已复制。请在终端执行，完成登录后保存并连接。";
+"source.reload_accounts" = "重新加载 CC Switch 账号";
 "status.demo" = "演示数据";
 "status.refreshing" = "正在刷新…";
 "status.error" = "连接失败";
@@ -128,6 +136,10 @@
 "error.executable" = "未找到 Codex，请在设置 → 数据源中选择。";
 "error.home" = "未找到 Codex 目录，请检查设置中的路径。";
 "error.login" = "请运行 codex login 登录后刷新。";
+"error.ccswitch_unavailable" = "无法读取 CC Switch 数据，请检查 CC Switch 是否已安装。";
+"error.official_provider" = "选中的 CC Switch 官方账号不可用，请重新加载账号列表。";
+"error.account_mismatch" = "此 Codex 登录与选中的 CC Switch 账号不一致，请登录对应账号。";
+"error.isolated_login" = "请运行“数据来源”中复制的独立登录命令，完成后刷新。";
 "error.auth_type" = "请运行 codex login 登录 ChatGPT 账号。";
 "error.timeout" = "连接超时，请重试。";
 "error.server_exit" = "Codex 连接已断开，请重试。";

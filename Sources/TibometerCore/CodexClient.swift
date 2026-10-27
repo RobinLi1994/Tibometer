@@ -6,6 +6,10 @@ public enum TibometerError: LocalizedError, Equatable {
     case executableMissing
     case invalidHome
     case notSignedIn
+    case isolatedLoginRequired
+    case ccSwitchUnavailable
+    case officialProviderMissing
+    case accountMismatch
     case unsupportedAccount
     case timeout
     case serverExited
@@ -22,6 +26,10 @@ public enum TibometerError: LocalizedError, Equatable {
         case .executableMissing: return "error.executable"
         case .invalidHome: return "error.home"
         case .notSignedIn: return "error.login"
+        case .isolatedLoginRequired: return "error.isolated_login"
+        case .ccSwitchUnavailable: return "error.ccswitch_unavailable"
+        case .officialProviderMissing: return "error.official_provider"
+        case .accountMismatch: return "error.account_mismatch"
         case .unsupportedAccount: return "error.auth_type"
         case .timeout: return "error.timeout"
         case .serverExited: return "error.server_exit"

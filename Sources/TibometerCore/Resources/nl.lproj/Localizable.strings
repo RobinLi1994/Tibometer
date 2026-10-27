@@ -155,3 +155,15 @@
 "credits.none" = "Geen credits beschikbaar";
 "error.read_only" = "Niet-ondersteunde bewerking.";
 "error.thread_id" = "Geef de ID van een bestaande taak op.";
+"source.mode" = "Usage source";
+"source.local_codex" = "Local Codex";
+"source.ccswitch" = "CC Switch official";
+"source.official_account" = "Official account";
+"source.copy_login" = "Copy login command";
+"source.ccswitch_help" = "Sign in once with this account in the separate data folder, then save and connect. Your active Codex provider stays unchanged.";
+"source.login_copied" = "Login command copied. Run it in Terminal, then save and connect.";
+"error.ccswitch_unavailable" = "CC Switch data is unavailable. Check that CC Switch is installed.";
+"error.official_provider" = "The selected CC Switch official account is unavailable. Refresh the account list.";
+"error.account_mismatch" = "This Codex login is not the selected CC Switch account. Sign in with the matching account.";
+"source.reload_accounts" = "Reload CC Switch accounts";
+"error.isolated_login" = "Run the separate login command copied from Data Source settings, then refresh.";

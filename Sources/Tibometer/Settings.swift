@@ -8,6 +8,7 @@ struct Settings: Codable, Equatable {
     var webhookEnabled = false
     var codexPath = ""
     var codexHome = ""
+    var ccSwitchProviderID: String?
 
     static func load() -> Settings {
         guard let data = UserDefaults.standard.data(forKey: "settings"),

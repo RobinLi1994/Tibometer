@@ -115,6 +115,14 @@
 "source.saved" = "Saved. Connecting…";
 "source.save" = "Save and Connect";
 "source.custom_section" = "Connection";
+"source.mode" = "Usage source";
+"source.local_codex" = "Local Codex";
+"source.ccswitch" = "CC Switch official";
+"source.official_account" = "Official account";
+"source.copy_login" = "Copy login command";
+"source.ccswitch_help" = "Sign in once with this account in the separate data folder, then save and connect. Your active Codex provider stays unchanged.";
+"source.login_copied" = "Login command copied. Run it in Terminal, then save and connect.";
+"source.reload_accounts" = "Reload CC Switch accounts";
 "status.demo" = "Demo data";
 "status.refreshing" = "Refreshing…";
 "status.error" = "Connection failed";
@@ -128,6 +136,10 @@
 "error.executable" = "Codex not found. Choose it in Settings → Data Source.";
 "error.home" = "Codex folder not found. Check the path in Settings.";
 "error.login" = "Run codex login, then refresh.";
+"error.ccswitch_unavailable" = "CC Switch data is unavailable. Check that CC Switch is installed.";
+"error.official_provider" = "The selected CC Switch official account is unavailable. Refresh the account list.";
+"error.account_mismatch" = "This Codex login is not the selected CC Switch account. Sign in with the matching account.";
+"error.isolated_login" = "Run the separate login command copied from Data Source settings, then refresh.";
 "error.auth_type" = "Run codex login and sign in with your ChatGPT account.";
 "error.timeout" = "Connection timed out. Try again.";
 "error.server_exit" = "Codex disconnected. Try again.";

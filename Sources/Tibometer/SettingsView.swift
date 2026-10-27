@@ -26,6 +26,10 @@ struct SettingsView: View {
     @State private var webhookEnabled = false
     @State private var codexPath = ""
     @State private var codexHome = ""
+    @State private var useCCSwitch = false
+    @State private var ccSwitchProviderID = ""
+    @State private var ccSwitchProviders: [CCSwitchOfficialProvider] = []
+    @State private var ccSwitchError: LocalizedMessage?
 
     private func binding<Value>(_ keyPath: WritableKeyPath<Settings, Value>) -> Binding<Value> {
         Binding(get: { monitor.settings[keyPath: keyPath] }, set: { value in
@@ -50,6 +54,9 @@ struct SettingsView: View {
             webhookEnabled = monitor.settings.webhookEnabled
             codexPath = monitor.settings.codexPath
             codexHome = monitor.settings.codexHome
+            useCCSwitch = monitor.settings.ccSwitchProviderID != nil
+            ccSwitchProviderID = monitor.settings.ccSwitchProviderID ?? ""
+            reloadCCSwitchProviders()
             Task { await notifier.refreshPermission() }
         }
     }
@@ -225,22 +232,74 @@ struct SettingsView: View {
     private var source: some View {
         Form {
             Section {
+                Picker(L10n.text("source.mode"), selection: $useCCSwitch) {
+                    Text(L10n.text("source.local_codex")).tag(false)
+                    Text(L10n.text("source.ccswitch")).tag(true)
+                }
+                .pickerStyle(.segmented)
                 HStack {
                     TextField(L10n.text("source.executable"), text: $codexPath, prompt: Text(L10n.text("source.automatic")))
                     Button(L10n.text("source.choose"), action: chooseCodex)
                 }
-                TextField(L10n.text("source.home"), text: $codexHome, prompt: Text(L10n.text("source.default_home")))
-                if let executable = try? CodexLocator.executable(custom: monitor.settings.codexPath) {
-                    LabeledContent(L10n.text("source.current")) { Text(executable).font(.caption).textSelection(.enabled).lineLimit(3) }
+                if useCCSwitch {
+                    HStack {
+                        Picker(L10n.text("source.official_account"), selection: $ccSwitchProviderID) {
+                            ForEach(ccSwitchProviders) { provider in Text(provider.name).tag(provider.id) }
+                        }
+                        Button(action: reloadCCSwitchProviders) {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                        .help(L10n.text("source.reload_accounts"))
+                    }
+                    HStack {
+                        Text(OfficialCodexHome.defaultURL.path).font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
+                        Spacer()
+                        Button(L10n.text("source.copy_login"), action: copyOfficialLoginCommand)
+                            .disabled(ccSwitchProviderID.isEmpty)
+                    }
+                    Text(L10n.text("source.ccswitch_help")).font(.caption).foregroundStyle(.secondary)
+                    if let ccSwitchError { Text(ccSwitchError.localized).font(.caption).foregroundStyle(.secondary) }
+                } else {
+                    TextField(L10n.text("source.home"), text: $codexHome, prompt: Text(L10n.text("source.default_home")))
+                    if let executable = try? CodexLocator.executable(custom: codexPath) {
+                        LabeledContent(L10n.text("source.current")) { Text(executable).font(.caption).textSelection(.enabled).lineLimit(3) }
+                    }
                 }
                 if let feedback = monitor.sourceConnection.message {
                     Text(feedback.localized).font(.caption).foregroundStyle(.secondary)
                 }
                 Button(L10n.text("source.save")) {
-                    monitor.saveAndConnect(executablePath: codexPath, homePath: codexHome)
+                    monitor.saveAndConnect(executablePath: codexPath, homePath: codexHome,
+                                           ccSwitchProviderID: useCCSwitch ? ccSwitchProviderID : nil)
                 }
+                .disabled(useCCSwitch && ccSwitchProviderID.isEmpty)
             } header: { Text(L10n.text("source.custom_section")) }
         }.formStyle(.grouped)
+    }
+
+    private func reloadCCSwitchProviders() {
+        do {
+            ccSwitchProviders = try CCSwitchOfficialSource().providers()
+            ccSwitchError = ccSwitchProviders.isEmpty ? TibometerError.officialProviderMissing.userMessage : nil
+            if !ccSwitchProviders.contains(where: { $0.id == ccSwitchProviderID }) {
+                ccSwitchProviderID = ccSwitchProviders.first?.id ?? ""
+            }
+        } catch {
+            ccSwitchProviders = []
+            ccSwitchProviderID = ""
+            ccSwitchError = .from(error)
+        }
+    }
+
+    private func copyOfficialLoginCommand() {
+        do {
+            try OfficialCodexHome.prepare()
+            let executable = try CodexLocator.executable(custom: codexPath)
+            let command = OfficialCodexHome.loginCommand(executable: executable)
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(command, forType: .string)
+            ccSwitchError = "source.login_copied"
+        } catch { ccSwitchError = .from(error) }
     }
 
     private func chooseCodex() {

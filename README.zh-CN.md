@@ -31,6 +31,14 @@ A tiny Codex usage monitor
 
 若未自动找到 Codex，可在「设置 → 数据源」中手动选择。
 
+### 监控 CC Switch 的官方账号
+
+在「设置 → 数据源」选择「CC Switch 官方账号」，选中要监控的官方卡片，点击「复制登录命令」，到终端运行并用该卡片对应的 ChatGPT 账号完成一次登录。这个命令使用 `~/Library/Application Support/Tibometer/OfficialCodex` 作为独立数据目录，不修改当前 Codex 或 CC Switch 的供应商配置。
+
+回到 Tibometer 点击「保存并连接」。应用会核对独立登录与所选 CC Switch 卡片的 workspace 和用户身份；不一致时停止更新额度，也不会发送错误账号的重置提醒。它只从 CC Switch 数据库和授权中心文件读取账号绑定信息，不使用或刷新 CC Switch 的 refresh token。额度仍由独立的 Codex 登录获取。
+
+请保持 CC Switch 在后台运行。若登录错了账号，请在复制的登录命令中把末尾的 `login` 改为 `logout`，执行后再运行原登录命令。不要复制或分享任何 `auth.json` 文件。
+
 ## 通知与 Webhook
 
 在「设置 → 通知」中开启重置提醒。
@@ -39,7 +47,7 @@ A tiny Codex usage monitor
 
 ## 数据读取
 
-Tibometer 通过本机 Codex 应用读取额度。设置和重置记录保存在 Mac 上，可选的 Webhook 向你配置的地址发送提醒。
+Tibometer 通过本机 Codex 应用读取额度。CC Switch 模式使用独立登录，并只读取 CC Switch 账号元数据来校验身份。设置和重置记录保存在 Mac 上，可选的 Webhook 向你配置的地址发送提醒。
 
 ## 开发
 
