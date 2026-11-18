@@ -170,3 +170,31 @@
 "credits.none" = "无可用点数";
 "error.read_only" = "不支持此操作。";
 "error.thread_id" = "请提供已有任务的 ID。";
+"common.cancel" = "取消";
+"status.no_accounts" = "尚未配置账号";
+"status.no_accounts_available" = "没有可用账号";
+"status.multi_issue" = "{0} 个账号需要注意";
+"multi.accounts_summary" = "正在监听 {0} 个账号";
+"multi.lowest_remaining" = "最低剩余额度 {0}%";
+"multi.issue_count" = "{0} 个需要注意";
+"multi.pause" = "暂停监听";
+"multi.resume" = "恢复监听";
+"multi.remove" = "移除账号";
+"multi.paused" = "已暂停";
+"multi.enabled" = "已启用";
+"multi.account_name" = "账号名称";
+"multi.add_account" = "添加账号";
+"multi.accounts" = "账号";
+"error.account_limit" = "最多可以监听 10 个账号。";
+
+"multi.account_label" = "账号：{0}";
+
+"multi.rename" = "重命名";
+
+"error.duplicate_account_name" = "账号名称已存在。";
+
+"error.account_name_empty" = "请输入账号名称。";
+
+"error.account_name_invalid" = "请输入账号名称。";
+
+"multi.second_lowest" = "第二低 {0}%";

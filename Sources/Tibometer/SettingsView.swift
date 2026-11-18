@@ -26,6 +26,11 @@ struct SettingsView: View {
     @State private var webhookEnabled = false
     @State private var codexPath = ""
     @State private var codexHome = ""
+    @State private var accountName = ""
+    @State private var accountHome = ""
+    @State private var editingAccountID: UUID?
+    @State private var editingAccountName = ""
+    @State private var addingAccount = false
     @State private var useCCSwitch = false
     @State private var ccSwitchProviderID = ""
     @State private var ccSwitchProviders: [CCSwitchOfficialProvider] = []
@@ -54,6 +59,8 @@ struct SettingsView: View {
             webhookEnabled = monitor.settings.webhookEnabled
             codexPath = monitor.settings.codexPath
             codexHome = monitor.settings.codexHome
+            accountName = ""
+            accountHome = ""
             useCCSwitch = monitor.settings.ccSwitchProviderID != nil
             ccSwitchProviderID = monitor.settings.ccSwitchProviderID ?? ""
             reloadCCSwitchProviders()
@@ -231,8 +238,107 @@ struct SettingsView: View {
         return value
     }
 
+    private var officialLoginHomePath: String {
+        if let selected = monitor.selectedAccount,
+           selected.source.providerID == ccSwitchProviderID {
+            return selected.source.homePath
+        }
+        return OfficialCodexHome.defaultURL.path
+    }
+
     private var source: some View {
         Form {
+            if monitor.accounts.count > 0 {
+                Section {
+                    ForEach(monitor.accounts) { account in
+                        HStack(spacing: 8) {
+                            Circle().fill(account.enabled ? TibometerStyle.success : .secondary).frame(width: 7, height: 7)
+                            VStack(alignment: .leading, spacing: 2) {
+                                if editingAccountID == account.id {
+                                    TextField(L10n.text("multi.account_name"), text: $editingAccountName)
+                                        .textFieldStyle(.roundedBorder)
+                                    HStack(spacing: 6) {
+                                        Button(L10n.text("common.done")) {
+                                            if monitor.renameAccount(account.id, name: editingAccountName) {
+                                                editingAccountID = nil
+                                            }
+                                        }
+                                        .buttonStyle(.borderedProminent)
+                                        .controlSize(.small)
+                                        .disabled(editingAccountName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                                        Button(L10n.text("common.cancel")) {
+                                            editingAccountID = nil
+                                        }
+                                        .controlSize(.small)
+                                    }
+                                } else {
+                                    HStack(spacing: 6) {
+                                        Text(account.name).font(.system(size: 12, weight: .medium))
+                                        Button {
+                                            editingAccountID = account.id
+                                            editingAccountName = account.name
+                                        } label: {
+                                            Image(systemName: "pencil")
+                                                .font(.caption)
+                                        }
+                                        .buttonStyle(.borderless)
+                                        .help(L10n.text("multi.rename"))
+                                    }
+                                }
+                                Text(account.source.homePath).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                            }
+                            Spacer()
+                            Toggle(L10n.text("multi.enabled"), isOn: Binding(get: { monitor.accounts.first(where: { $0.id == account.id })?.enabled ?? false }, set: { monitor.setAccountEnabled(account.id, enabled: $0) }))
+                                .labelsHidden().toggleStyle(.switch).controlSize(.small)
+                            if monitor.accounts.count > 1 {
+                                Button(role: .destructive) { monitor.removeAccount(account.id) } label: { Image(systemName: "trash") }
+                                    .buttonStyle(.borderless)
+                            }
+                        }
+                    }
+                    if addingAccount {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(L10n.text("multi.account_name"))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            TextField(L10n.text("multi.account_name"), text: $accountName)
+                                .textFieldStyle(.roundedBorder)
+                        }
+                        if useCCSwitch {
+                            Picker(L10n.text("source.official_account"), selection: $ccSwitchProviderID) {
+                                ForEach(ccSwitchProviders) { provider in
+                                    Text(provider.name).tag(provider.id)
+                                }
+                            }
+                            Text(L10n.text("source.ccswitch_help")).font(.caption).foregroundStyle(.secondary)
+                        } else {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(L10n.text("source.home"))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                TextField(L10n.text("source.default_home"), text: $accountHome)
+                                    .textFieldStyle(.roundedBorder)
+                            }
+                        }
+                        HStack {
+                            Button(L10n.text("common.done")) {
+                                if monitor.addAccount(name: accountName, executablePath: codexPath, homePath: accountHome,
+                                                       ccSwitchProviderID: useCCSwitch ? ccSwitchProviderID : nil) {
+                                    accountName = ""
+                                    accountHome = ""
+                                    addingAccount = false
+                                }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(accountName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                      || (useCCSwitch && ccSwitchProviderID.isEmpty))
+                            Button(L10n.text("common.cancel")) { addingAccount = false }
+                        }
+                    } else {
+                        Button(L10n.text("multi.add_account")) { addingAccount = true }
+                    }
+                } header: { Text(L10n.text("multi.accounts")) }
+            }
             Section {
                 Picker(L10n.text("source.mode"), selection: $useCCSwitch) {
                     Text(L10n.text("source.local_codex")).tag(false)
@@ -254,7 +360,7 @@ struct SettingsView: View {
                         .help(L10n.text("source.reload_accounts"))
                     }
                     HStack {
-                        Text(OfficialCodexHome.defaultURL.path).font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
+                        Text(officialLoginHomePath).font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
                         Spacer()
                         Button(L10n.text("source.copy_login"), action: copyOfficialLoginCommand)
                             .disabled(ccSwitchProviderID.isEmpty)
@@ -297,7 +403,15 @@ struct SettingsView: View {
         do {
             try OfficialCodexHome.prepare()
             let executable = try CodexLocator.executable(custom: codexPath)
-            let command = OfficialCodexHome.loginCommand(executable: executable)
+            let home: URL
+            if let selected = monitor.selectedAccount,
+               selected.source.providerID == ccSwitchProviderID {
+                home = URL(fileURLWithPath: selected.source.homePath)
+                try OfficialCodexHome.prepare(at: home)
+            } else {
+                home = OfficialCodexHome.defaultURL
+            }
+            let command = OfficialCodexHome.loginCommand(executable: executable, home: home)
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString(command, forType: .string)
             ccSwitchError = "source.login_copied"

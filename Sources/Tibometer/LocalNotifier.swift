@@ -29,14 +29,14 @@ final class LocalNotifier: NSObject, ObservableObject, UNUserNotificationCenterD
         await refreshPermission()
     }
 
-    func send(_ event: ResetEvent, sound: Bool, isTest: Bool = false) async throws -> LocalizedMessage {
+    func send(_ event: ResetEvent, sound: Bool, isTest: Bool = false, accountName: String? = nil) async throws -> LocalizedMessage {
         await refreshPermission()
         guard authorization == .authorized || authorization == .provisional else {
             return "notification.unauthorized"
         }
         let content = UNMutableNotificationContent()
         content.title = isTest ? L10n.text("notification.test_title") : event.notificationTitle
-        content.subtitle = isTest ? "" : event.window.title
+        content.subtitle = isTest ? "" : [accountName, event.window.title].compactMap { $0 }.joined(separator: " · ")
         content.body = isTest ? L10n.text("notification.test_body") : event.message
         if sound { content.sound = .default }
         content.threadIdentifier = "tibometer.quota-resets"

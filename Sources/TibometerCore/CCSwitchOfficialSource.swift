@@ -106,6 +106,12 @@ public enum OfficialCodexHome {
             .appendingPathComponent("Tibometer/OfficialCodex", isDirectory: true)
     }
 
+    public static func accountURL(for accountID: UUID) -> URL {
+        defaultURL.deletingLastPathComponent().appendingPathComponent("Accounts", isDirectory: true)
+            .appendingPathComponent(accountID.uuidString, isDirectory: true)
+            .appendingPathComponent("OfficialCodex", isDirectory: true)
+    }
+
     public static func prepare(at url: URL = defaultURL) throws {
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
         let config = url.appendingPathComponent("config.toml")

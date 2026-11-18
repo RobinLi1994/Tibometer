@@ -170,3 +170,31 @@
 "error.account_mismatch" = "This Codex login is not the selected CC Switch account. Sign in with the matching account.";
 "source.reload_accounts" = "Reload CC Switch accounts";
 "error.isolated_login" = "Run the separate login command copied from Data Source settings, then refresh.";
+"common.cancel" = "取消";
+"status.no_accounts" = "尚未設定帳號";
+"status.no_accounts_available" = "沒有可用帳號";
+"status.multi_issue" = "{0} 個帳號需要注意";
+"multi.accounts_summary" = "正在監聽 {0} 個帳號";
+"multi.lowest_remaining" = "最低剩餘額度 {0}%";
+"multi.issue_count" = "{0} 個需要注意";
+"multi.pause" = "暫停監聽";
+"multi.resume" = "恢復監聽";
+"multi.remove" = "移除帳號";
+"multi.paused" = "已暫停";
+"multi.enabled" = "已啟用";
+"multi.account_name" = "帳號名稱";
+"multi.add_account" = "新增帳號";
+"multi.accounts" = "帳號";
+"error.account_limit" = "最多可以監聽 10 個帳號。";
+
+"multi.account_label" = "帳號：{0}";
+
+"multi.rename" = "重新命名";
+
+"error.duplicate_account_name" = "帳號名稱已存在。";
+
+"error.account_name_empty" = "請輸入帳號名稱。";
+
+"error.account_name_invalid" = "請輸入帳號名稱。";
+
+"multi.second_lowest" = "第二低 {0}%";

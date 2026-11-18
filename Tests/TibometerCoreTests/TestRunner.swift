@@ -111,6 +111,13 @@ struct TestRunner {
         Checks.run("private webhook file persistence and atomic replacement", storage.testPrivateFileSurvivesReopenAndOverwrite)
         Checks.run("damaged webhook file is preserved", storage.testDamagedFileReportsErrorWithoutOverwritingIt)
         Checks.run("failed webhook save preserves destination", storage.testFailedWriteKeepsExistingDestinationAndRemovesTemporaryFiles)
+        let multiAccount = MultiAccountTests()
+        tryRun("legacy settings migrate to first account", multiAccount.testLegacySettingsMigrateToFirstAccountAndPreserveSource)
+        tryRun("account registry validates names paths and limit", multiAccount.testRegistryRejectsDuplicateNamesAndHomesAndCapsAtTenAccounts)
+        Checks.run("multi-account aggregate picks lowest remaining and counts issues", multiAccount.testAggregateUsesLowestRemainingAndCountsIssues)
+        Checks.run("refresh batch excludes paused and caps concurrency", multiAccount.testRefreshBatchExcludesPausedAndLimitsConcurrency)
+        tryRun("account rename preserves identity and home", multiAccount.testRegistryRenamesAccountWithoutChangingItsIdentityOrHome)
+        Checks.run("account summary exposes lowest window reset date", multiAccount.testSummaryUsesResetDateForLowestRemainingWindow)
         let hooks = WebhookTests()
         Checks.run("webhook URL validation", hooks.testOnlyHTTPSOrLoopbackHTTPIsAccepted)
         Checks.run("payload privacy and event ID", hooks.testGenericPayloadHasNoAccountCredentialsAndStableEventID)
@@ -118,6 +125,7 @@ struct TestRunner {
         Checks.run("DingTalk signed URL and payload", hooks.testDingTalkSignedURLPreservesTokenAndEncodesSignature)
         Checks.run("DingTalk requires signing secret", hooks.testDingTalkRequiresSigningSecret)
         Checks.run("webhook message formats", hooks.testTestEventAndChatFormats)
+        Checks.run("account name appears in chat message body", hooks.testAccountNameIsIncludedInChatMessageBody)
         Checks.run("fixed reset copy, window scope and original quota data", hooks.testResetMessagesUseFullResetCopyAndPreserveQuotaData)
         let locator = CodexLocatorTests()
         Checks.run("renamed and relocated Codex application", locator.testRegisteredApplicationDoesNotDependOnItsNameOrLocation)
@@ -138,5 +146,9 @@ struct TestRunner {
         for failure in Checks.failures { FileHandle.standardError.write(Data((failure + "\n").utf8)) }
         print("\(Checks.count) checks, \(Checks.failures.count) failures")
         exit(Checks.failures.isEmpty ? 0 : 1)
+    }
+
+    private static func tryRun(_ name: String, _ body: () throws -> Void) {
+        Checks.run(name, body)
     }
 }

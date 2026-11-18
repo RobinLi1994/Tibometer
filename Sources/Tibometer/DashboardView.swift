@@ -43,6 +43,11 @@ struct DashboardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header.padding(.bottom, 16)
+            if monitor.accounts.count > 1 {
+                multiAccountSummary
+                accountList
+                    .padding(.bottom, 12)
+            }
             quotaSection
             VStack(alignment: .leading, spacing: 0) {
                 if let credits = visibleCredits {
@@ -104,6 +109,94 @@ struct DashboardView: View {
                 }
             }
             .padding(.bottom, 8)
+        }
+    }
+
+    private var multiAccountSummary: some View {
+        let aggregate = MultiAccountPresentation.aggregate(monitor.accountSummaries)
+        return HStack(spacing: 10) {
+            Image(systemName: "circle.grid.2x2.fill")
+                .font(.system(size: 13)).foregroundStyle(TibometerStyle.foreground)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(L10n.text("multi.accounts_summary", String(aggregate.accountCount)))
+                    .font(DashboardTypography.body)
+                HStack(spacing: 8) {
+                    Text(aggregate.lowestRemainingPercent.map { L10n.text("multi.lowest_remaining", String($0)) }
+                         ?? L10n.text("status.no_accounts_available"))
+                    if let second = aggregate.secondLowestRemainingPercent {
+                        Text(L10n.text("multi.second_lowest", String(second)))
+                    }
+                }
+                .font(DashboardTypography.caption).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 8)
+            if aggregate.issueCount > 0 {
+                Text(L10n.text("multi.issue_count", String(aggregate.issueCount)))
+                    .font(DashboardTypography.caption).foregroundStyle(TibometerStyle.warning)
+            }
+        }
+        .padding(.horizontal, 14).padding(.vertical, 11)
+        .modifier(DashboardCardSurface())
+    }
+
+    private var accountList: some View {
+        VStack(spacing: 1) {
+            ForEach(monitor.accountSummaries, id: \.id) { summary in
+                Button { monitor.selectAccount(summary.id) } label: {
+                    HStack(spacing: 9) {
+                        Circle()
+                            .fill(summary.status == .connected ? TibometerStyle.success : TibometerStyle.warning)
+                            .frame(width: 7, height: 7)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(summary.name).font(DashboardTypography.body)
+                            HStack(spacing: 6) {
+                                Text(accountStatusText(summary.status))
+                                if let fiveHour = summary.remainingPercent(for: .fiveHour) {
+                                    Text("5H \(Int(fiveHour.rounded(.down)))%")
+                                }
+                                if let weekly = summary.remainingPercent(for: .weekly) {
+                                    Text("7D \(Int(weekly.rounded(.down)))%")
+                                }
+                            }
+                            .font(DashboardTypography.caption).foregroundStyle(.secondary)
+                            if let resetDate = summary.resetDate {
+                                Text(L10n.countdown(resetDate, now: clock.now))
+                                    .font(DashboardTypography.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        Spacer(minLength: 8)
+                        Text(summary.remainingPercent.map { "\(Int($0.rounded(.down)))%" } ?? "—")
+                            .font(DashboardTypography.body).monospacedDigit()
+                            .foregroundStyle(summary.status == .error ? TibometerStyle.warning : .primary)
+                    }
+                    .padding(.horizontal, 12).padding(.vertical, 9)
+                    .background(summary.id == monitor.selectedAccountID ? TibometerStyle.subtleSurface : .clear,
+                                in: RoundedRectangle(cornerRadius: 9))
+                }
+                .buttonStyle(.plain)
+                .contextMenu {
+                    Button(summary.enabled ? L10n.text("multi.pause") : L10n.text("multi.resume")) {
+                        monitor.setAccountEnabled(summary.id, enabled: !summary.enabled)
+                    }
+                    if monitor.accounts.count > 1 {
+                        Button(L10n.text("multi.remove"), role: .destructive) { monitor.removeAccount(summary.id) }
+                    }
+                }
+            }
+        }
+        .padding(5)
+        .modifier(DashboardCardSurface())
+    }
+
+    private func accountStatusText(_ status: AccountConnectionStatus) -> String {
+        switch status {
+        case .connected: return L10n.text("status.connected")
+        case .refreshing: return L10n.text("status.refreshing")
+        case .error: return L10n.text("status.error")
+        case .stale: return L10n.text("status.stale")
+        case .paused: return L10n.text("multi.paused")
+        case .connecting: return L10n.text("status.connecting")
         }
     }
 

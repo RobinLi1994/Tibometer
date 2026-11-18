@@ -22,6 +22,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var settingsWindow: NSWindow?
     private var monitor: UsageMonitor!
     private var renderedMenuBar: MenuBarRenderer?
+    private var renderedMultiMenuBar: MultiAccountMenuBarRenderer?
     private var menuLanguage: AppLanguage?
     private var cancellables: Set<AnyCancellable> = []
 
@@ -60,19 +61,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             NSApp.mainMenu = ApplicationMenu.make()
         }
         let title = monitor.menuBarTitle
-        let renderer = MenuBarRenderer(style: monitor.menuBarStyle, bucket: monitor.codexBucket,
-                                       scope: monitor.menuBarScope,
-                                       stale: monitor.lastError != nil || monitor.isStale)
-        if renderer != renderedMenuBar, let button = statusItem.button {
-            button.title = ""
-            button.imagePosition = .imageOnly
-            button.imageScaling = .scaleNone
-            if let image = renderer.image() {
-                button.image = image
-            } else {
-                button.image = BrandAssets.menuBarIcon
+        if monitor.accounts.count > 1, let button = statusItem.button {
+            let renderer = MultiAccountMenuBarRenderer(values: monitor.accountSummaries.prefix(2).compactMap { summary in
+                summary.remainingPercent.map { Int($0.rounded(.down)) }
+            }, warning: MultiAccountPresentation.aggregate(monitor.accountSummaries).issueCount > 0)
+            if renderer != renderedMultiMenuBar {
+                button.title = ""
+                button.imagePosition = .imageOnly
+                button.imageScaling = .scaleNone
+                button.image = renderer.image() ?? BrandAssets.menuBarIcon
+                renderedMultiMenuBar = renderer
             }
-            renderedMenuBar = renderer
+            renderedMenuBar = nil
+        } else {
+            let renderer = MenuBarRenderer(style: monitor.menuBarStyle, bucket: monitor.codexBucket,
+                                           scope: monitor.menuBarScope,
+                                           stale: monitor.lastError != nil || monitor.isStale)
+            if renderer != renderedMenuBar, let button = statusItem.button {
+                button.title = ""
+                button.imagePosition = .imageOnly
+                button.imageScaling = .scaleNone
+                if let image = renderer.image() {
+                    button.image = image
+                } else {
+                    button.image = BrandAssets.menuBarIcon
+                }
+                renderedMenuBar = renderer
+            }
+            renderedMultiMenuBar = nil
         }
         statusItem.button?.toolTip = "\(title)\n\(monitor.statusText)\n\(monitor.menuBarHelp)"
         statusItem.button?.setAccessibilityLabel(L10n.text("app.accessibility"))

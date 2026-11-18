@@ -83,6 +83,17 @@ final class WebhookTests {
         }
     }
 
+    func testAccountNameIsIncludedInChatMessageBody() throws {
+        let event = ResetEvent.testEvent()
+        let configuration = WebhookConfiguration(url: "https://example.com", format: .dingtalk, signingSecret: "SECtest-secret")
+        let request = try WebhookRequestBuilder.build(event: event, configuration: configuration,
+                                                       accountName: "Work")
+        let body = try require(JSONSerialization.jsonObject(with: require(request.httpBody)) as? [String: Any])
+        let content = try require((body["text"] as? [String: String])?["content"])
+        expect(content.hasPrefix("账号：Work\n"))
+        expect(content.contains(L10n.text("reset.headline")) || content.contains(event.notificationTitle))
+    }
+
     func testResetMessagesUseFullResetCopyAndPreserveQuotaData() throws {
         let previous = L10n.preference
         defer { L10n.preference = previous }

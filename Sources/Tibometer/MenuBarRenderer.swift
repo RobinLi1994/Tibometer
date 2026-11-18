@@ -124,3 +124,63 @@ struct MenuBarRenderer: Equatable {
         }
     }
 }
+
+struct MultiAccountMenuBarRenderer: Equatable {
+    let values: [Int]
+    let warning: Bool
+
+    func image() -> NSImage? {
+        guard !values.isEmpty else { return nil }
+        let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .bold)
+        let ringDiameter: CGFloat = 18
+        let lineWidth: CGFloat = 2.5
+        let gap: CGFloat = 5
+        let valueWidths = values.map { NSString(string: "\($0)%").size(withAttributes: [.font: font]).width }
+        let itemWidths: [CGFloat] = valueWidths.map { ringDiameter + 4 + $0 }
+        let warningWidth: CGFloat = warning ? 12 : 0
+        let itemWidthTotal = itemWidths.reduce(CGFloat.zero, +)
+        let separatorWidth = CGFloat(max(0, values.count - 1)) * gap
+        let width = warningWidth + itemWidthTotal + separatorWidth + 3
+        let image = NSImage(size: NSSize(width: width, height: 22), flipped: false) { bounds in
+            var x = warningWidth + 1
+            for (index, value) in self.values.enumerated() {
+                let center = NSPoint(x: x + ringDiameter / 2, y: bounds.midY)
+                Self.drawRing(center: center, remainingPercent: Double(value), diameter: ringDiameter, lineWidth: lineWidth)
+                let text = NSString(string: "\(value)%")
+                text.draw(at: NSPoint(x: x + ringDiameter + 4, y: bounds.midY - 7),
+                          withAttributes: [.font: font, .foregroundColor: NSColor.black])
+                x += itemWidths[index] + gap
+            }
+            if self.warning {
+                NSString(string: "!").draw(at: NSPoint(x: 0, y: bounds.midY - 7),
+                                            withAttributes: [.font: NSFont.systemFont(ofSize: 12, weight: .bold),
+                                                              .foregroundColor: NSColor.black])
+            }
+            return true
+        }
+        image.isTemplate = true
+        return image
+    }
+
+    private static func drawRing(center: NSPoint, remainingPercent: Double, diameter: CGFloat, lineWidth: CGFloat) {
+        let rect = NSRect(x: center.x - diameter / 2, y: center.y - diameter / 2,
+                          width: diameter, height: diameter).insetBy(dx: lineWidth / 2, dy: lineWidth / 2)
+        let track = NSBezierPath(ovalIn: rect)
+        track.lineWidth = lineWidth
+        NSColor.black.withAlphaComponent(0.25).setStroke()
+        track.stroke()
+        guard remainingPercent > 0 else { return }
+        if remainingPercent >= 100 {
+            NSColor.black.setStroke()
+            track.stroke()
+            return
+        }
+        let progress = NSBezierPath()
+        progress.lineWidth = lineWidth
+        progress.lineCapStyle = .round
+        progress.appendArc(withCenter: center, radius: rect.width / 2,
+                           startAngle: 90, endAngle: 90 - remainingPercent * 3.6, clockwise: true)
+        NSColor.black.setStroke()
+        progress.stroke()
+    }
+}

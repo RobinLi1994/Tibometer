@@ -72,8 +72,10 @@ public struct WebhookPayload: Encodable {
     public var nextResetAt: Date?
     public var reason: String
     public var message: String
+    public var accountName: String?
+    public var accountFingerprint: String?
 
-    public init(reset: ResetEvent, isTest: Bool) {
+    public init(reset: ResetEvent, isTest: Bool, accountName: String? = nil, accountFingerprint: String? = nil) {
         event = isTest ? "codex.webhook.test" : "codex.limit.reset"
         eventId = reset.id
         observedAt = reset.observedAt
@@ -86,7 +88,10 @@ public struct WebhookPayload: Encodable {
         previousResetAt = reset.previousResetAt
         nextResetAt = reset.nextResetAt
         reason = reset.reason.rawValue
-        message = isTest ? L10n.text("webhook.test_message") : "\(reset.notificationTitle)\n\(reset.message)\n\(reset.window.title)"
+        let body = isTest ? L10n.text("webhook.test_message") : "\(reset.notificationTitle)\n\(reset.message)\n\(reset.window.title)"
+        message = accountName.map { L10n.text("multi.account_label", $0) + "\n" + body } ?? body
+        self.accountName = accountName
+        self.accountFingerprint = accountFingerprint.map { String($0.prefix(8)) }
     }
 }
 
@@ -97,8 +102,9 @@ public struct WebhookDeliveryError: LocalizedError {
 }
 
 public enum WebhookRequestBuilder {
-    public static func build(event: ResetEvent, configuration: WebhookConfiguration, isTest: Bool = false, now: Date = Date()) throws -> URLRequest {
-        let payload = WebhookPayload(reset: event, isTest: isTest)
+    public static func build(event: ResetEvent, configuration: WebhookConfiguration, isTest: Bool = false,
+                             now: Date = Date(), accountName: String? = nil, accountFingerprint: String? = nil) throws -> URLRequest {
+        let payload = WebhookPayload(reset: event, isTest: isTest, accountName: accountName, accountFingerprint: accountFingerprint)
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.keyEncodingStrategy = .convertToSnakeCase
@@ -174,8 +180,10 @@ private final class NoRedirectDelegate: NSObject, URLSessionTaskDelegate, @unche
 public struct WebhookSender: Sendable {
     public init() {}
 
-    public func send(event: ResetEvent, configuration: WebhookConfiguration, isTest: Bool = false) async throws {
-        let request = try WebhookRequestBuilder.build(event: event, configuration: configuration, isTest: isTest)
+    public func send(event: ResetEvent, configuration: WebhookConfiguration, isTest: Bool = false,
+                     accountName: String? = nil, accountFingerprint: String? = nil) async throws {
+        let request = try WebhookRequestBuilder.build(event: event, configuration: configuration, isTest: isTest,
+                                                      accountName: accountName, accountFingerprint: accountFingerprint)
         let sessionConfiguration = URLSessionConfiguration.ephemeral
         sessionConfiguration.timeoutIntervalForRequest = 15
         sessionConfiguration.timeoutIntervalForResource = 20

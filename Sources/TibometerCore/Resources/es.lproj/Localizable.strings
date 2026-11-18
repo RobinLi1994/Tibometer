@@ -170,3 +170,31 @@
 "error.account_mismatch" = "This Codex login is not the selected CC Switch account. Sign in with the matching account.";
 "source.reload_accounts" = "Reload CC Switch accounts";
 "error.isolated_login" = "Run the separate login command copied from Data Source settings, then refresh.";
+"common.cancel" = "Cancel";
+"status.no_accounts" = "No accounts configured";
+"status.no_accounts_available" = "No available accounts";
+"status.multi_issue" = "{0} accounts need attention";
+"multi.accounts_summary" = "Monitoring {0} accounts";
+"multi.lowest_remaining" = "Lowest remaining quota {0}%";
+"multi.issue_count" = "{0} need attention";
+"multi.pause" = "Pause monitoring";
+"multi.resume" = "Resume monitoring";
+"multi.remove" = "Remove account";
+"multi.paused" = "Paused";
+"multi.enabled" = "Enabled";
+"multi.account_name" = "Account name";
+"multi.add_account" = "Add account";
+"multi.accounts" = "Accounts";
+"error.account_limit" = "You can monitor up to 10 accounts.";
+
+"multi.account_label" = "Cuenta: {0}";
+
+"multi.rename" = "Cambiar nombre";
+
+"error.duplicate_account_name" = "El nombre de la cuenta ya existe.";
+
+"error.account_name_empty" = "Introduce un nombre de cuenta.";
+
+"error.account_name_invalid" = "Introduce un nombre de cuenta.";
+
+"multi.second_lowest" = "Segundo más bajo {0}%";
