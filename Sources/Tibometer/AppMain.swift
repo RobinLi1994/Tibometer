@@ -23,6 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var monitor: UsageMonitor!
     private var renderedMenuBar: MenuBarRenderer?
     private var renderedMultiMenuBar: MultiAccountMenuBarRenderer?
+    private let ringHighlights = MenuBarRingHighlights(frame: .zero)
     private var menuLanguage: AppLanguage?
     private var cancellables: Set<AnyCancellable> = []
 
@@ -44,6 +45,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             button.target = self
             button.action = #selector(togglePopover)
             button.setAccessibilityLabel(L10n.text("app.accessibility"))
+            ringHighlights.imageScaling = .scaleNone
+            ringHighlights.translatesAutoresizingMaskIntoConstraints = false
+            ringHighlights.setAccessibilityElement(false)
+            button.addSubview(ringHighlights)
+            NSLayoutConstraint.activate([
+                ringHighlights.centerXAnchor.constraint(equalTo: button.centerXAnchor),
+                ringHighlights.centerYAnchor.constraint(equalTo: button.centerYAnchor),
+                ringHighlights.widthAnchor.constraint(equalTo: button.widthAnchor),
+                ringHighlights.heightAnchor.constraint(equalTo: button.heightAnchor)
+            ])
         }
         dashboard = DashboardPanelController(monitor: monitor, statusItem: statusItem, openSettings: { [weak self] in self?.showSettings() })
         monitor.objectWillChange.sink { [weak self] _ in
@@ -62,14 +73,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         let title = monitor.menuBarTitle
         if monitor.accounts.count > 1, let button = statusItem.button {
-            let renderer = MultiAccountMenuBarRenderer(values: monitor.accountSummaries.prefix(2).compactMap { summary in
-                summary.remainingPercent.map { Int($0.rounded(.down)) }
-            }, warning: MultiAccountPresentation.aggregate(monitor.accountSummaries).issueCount > 0)
+            let renderer = MultiAccountMenuBarRenderer(values: monitor.accountSummaries.prefix(2).compactMap(\.remainingPercent),
+                warning: MultiAccountPresentation.aggregate(monitor.accountSummaries).issueCount > 0)
             if renderer != renderedMultiMenuBar {
+                let images = renderer.images()
                 button.title = ""
                 button.imagePosition = .imageOnly
                 button.imageScaling = .scaleNone
-                button.image = renderer.image() ?? BrandAssets.menuBarIcon
+                button.image = images.template ?? BrandAssets.menuBarIcon
+                ringHighlights.image = images.highlights
                 renderedMultiMenuBar = renderer
             }
             renderedMenuBar = nil
@@ -88,6 +100,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 }
                 renderedMenuBar = renderer
             }
+            ringHighlights.image = nil
             renderedMultiMenuBar = nil
         }
         statusItem.button?.toolTip = "\(title)\n\(monitor.statusText)\n\(monitor.menuBarHelp)"

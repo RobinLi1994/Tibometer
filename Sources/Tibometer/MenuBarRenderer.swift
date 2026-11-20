@@ -46,7 +46,8 @@ struct MenuBarRenderer: Equatable {
                 let startX = warningWidth + 1
                 if style.usesRings {
                     let center = NSPoint(x: startX + layout.centerX(forRing: index, percentageWidth: valueWidth), y: centerY)
-                    Self.drawRing(at: center, remainingPercent: item.remainingPercent, layout: layout)
+                    Self.drawRing(at: center, remainingPercent: item.remainingPercent,
+                                  diameter: layout.ringDiameter, lineWidth: layout.ringLineWidth)
                     label.draw(left: center.x - label.width / 2, centerY: centerY)
                     if style.showsPercentage {
                         let rightX = center.x + layout.ringDiameter / 2 + layout.ringPercentageSpacing + valueWidth
@@ -79,7 +80,7 @@ struct MenuBarRenderer: Equatable {
         return image
     }
 
-    private struct TextRun {
+    fileprivate struct TextRun {
         let line: CTLine
         let bounds: CGRect
         var width: CGFloat { bounds.width }
@@ -102,16 +103,17 @@ struct MenuBarRenderer: Equatable {
         }
     }
 
-    private static func drawRing(at center: NSPoint, remainingPercent: Double, layout: MenuBarLayout) {
-        let diameter = layout.ringDiameter
-        let lineWidth = layout.ringLineWidth
+    fileprivate static func drawRing(at center: NSPoint, remainingPercent: Double, diameter: CGFloat,
+                                     lineWidth: CGFloat, color: NSColor = .black, showsTrack: Bool = true) {
         let rect = NSRect(x: center.x - diameter / 2, y: center.y - diameter / 2, width: diameter, height: diameter)
             .insetBy(dx: lineWidth / 2, dy: lineWidth / 2)
         let track = NSBezierPath(ovalIn: rect)
         track.lineWidth = lineWidth
-        NSColor.black.withAlphaComponent(0.25).setStroke()
-        track.stroke()
-        NSColor.black.setStroke()
+        if showsTrack {
+            NSColor.black.withAlphaComponent(0.25).setStroke()
+            track.stroke()
+        }
+        color.setStroke()
         if remainingPercent >= 100 {
             track.stroke()
         } else if remainingPercent > 0 {
@@ -126,61 +128,52 @@ struct MenuBarRenderer: Equatable {
 }
 
 struct MultiAccountMenuBarRenderer: Equatable {
-    let values: [Int]
+    let values: [Double]
     let warning: Bool
 
-    func image() -> NSImage? {
-        guard !values.isEmpty else { return nil }
+    func images() -> (template: NSImage?, highlights: NSImage?) {
+        guard !values.isEmpty || warning else { return (nil, nil) }
         let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .bold)
         let ringDiameter: CGFloat = 18
         let lineWidth: CGFloat = 2.5
         let gap: CGFloat = 5
-        let valueWidths = values.map { NSString(string: "\($0)%").size(withAttributes: [.font: font]).width }
-        let itemWidths: [CGFloat] = valueWidths.map { ringDiameter + 4 + $0 }
-        let warningWidth: CGFloat = warning ? 12 : 0
-        let itemWidthTotal = itemWidths.reduce(CGFloat.zero, +)
-        let separatorWidth = CGFloat(max(0, values.count - 1)) * gap
-        let width = warningWidth + itemWidthTotal + separatorWidth + 3
-        let image = NSImage(size: NSSize(width: width, height: 22), flipped: false) { bounds in
-            var x = warningWidth + 1
-            for (index, value) in self.values.enumerated() {
-                let center = NSPoint(x: x + ringDiameter / 2, y: bounds.midY)
-                Self.drawRing(center: center, remainingPercent: Double(value), diameter: ringDiameter, lineWidth: lineWidth)
-                let text = NSString(string: "\(value)%")
-                text.draw(at: NSPoint(x: x + ringDiameter + 4, y: bounds.midY - 7),
-                          withAttributes: [.font: font, .foregroundColor: NSColor.black])
-                x += itemWidths[index] + gap
-            }
-            if self.warning {
-                NSString(string: "!").draw(at: NSPoint(x: 0, y: bounds.midY - 7),
-                                            withAttributes: [.font: NSFont.systemFont(ofSize: 12, weight: .bold),
-                                                              .foregroundColor: NSColor.black])
+        let warningLabel = MenuBarRenderer.TextRun("⚠︎", font: .systemFont(ofSize: 12, weight: .bold))
+        let labels = values.map { MenuBarRenderer.TextRun("\(Int($0.rounded(.down)))%", font: font) }
+        var x = warning ? 1 + ceil(warningLabel.width) + gap : 1
+        let positions = labels.map { label in
+            let left = x
+            x += ringDiameter + 4 + ceil(label.width) + gap
+            return left
+        }
+        let size = NSSize(width: x - gap + 2, height: 22)
+        let template = NSImage(size: size, flipped: false) { bounds in
+            if warning { warningLabel.draw(left: 1, centerY: bounds.midY) }
+            for (position, (value, label)) in zip(positions, zip(values, labels)) {
+                let center = NSPoint(x: position + ringDiameter / 2, y: bounds.midY)
+                if value > 0 {
+                    MenuBarRenderer.drawRing(at: center, remainingPercent: value < 50 ? 0 : value,
+                                             diameter: ringDiameter, lineWidth: lineWidth)
+                }
+                label.draw(left: position + ringDiameter + 4, centerY: bounds.midY)
             }
             return true
         }
-        image.isTemplate = true
-        return image
-    }
-
-    private static func drawRing(center: NSPoint, remainingPercent: Double, diameter: CGFloat, lineWidth: CGFloat) {
-        let rect = NSRect(x: center.x - diameter / 2, y: center.y - diameter / 2,
-                          width: diameter, height: diameter).insetBy(dx: lineWidth / 2, dy: lineWidth / 2)
-        let track = NSBezierPath(ovalIn: rect)
-        track.lineWidth = lineWidth
-        NSColor.black.withAlphaComponent(0.25).setStroke()
-        track.stroke()
-        guard remainingPercent > 0 else { return }
-        if remainingPercent >= 100 {
-            NSColor.black.setStroke()
-            track.stroke()
-            return
+        template.isTemplate = true
+        guard values.contains(where: { $0 < 50 }) else { return (template, nil) }
+        // AppKit tints the template for the menu bar. Draw the colored strokes on a separate layer.
+        let highlights = NSImage(size: size, flipped: false) { bounds in
+            for (position, value) in zip(positions, values) where value < 50 {
+                let center = NSPoint(x: position + ringDiameter / 2, y: bounds.midY)
+                MenuBarRenderer.drawRing(at: center, remainingPercent: value == 0 ? 100 : value,
+                                         diameter: ringDiameter, lineWidth: lineWidth,
+                                         color: value < 25 ? .systemRed : .systemOrange, showsTrack: false)
+            }
+            return true
         }
-        let progress = NSBezierPath()
-        progress.lineWidth = lineWidth
-        progress.lineCapStyle = .round
-        progress.appendArc(withCenter: center, radius: rect.width / 2,
-                           startAngle: 90, endAngle: 90 - remainingPercent * 3.6, clockwise: true)
-        NSColor.black.setStroke()
-        progress.stroke()
+        return (template, highlights)
     }
+}
+
+final class MenuBarRingHighlights: NSImageView {
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
